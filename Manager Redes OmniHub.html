@@ -1,0 +1,2770 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090d16" />
+  <title>Manager Redes OmniHub | Centro de Mando Omnicanal IA</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js para analíticas avanzadas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            slate: {
+              850: '#131b2e',
+              900: '#0d1322',
+              950: '#070a12',
+            },
+            brand: {
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              amber: '#f59e0b',
+              glow: 'rgba(139, 92, 246, 0.25)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #070a12;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+    /* Scrollbar personalizada estilo SaaS oscuro */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d1322;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+    .glass-panel {
+      background: rgba(13, 19, 34, 0.78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card {
+      background: linear-gradient(145deg, rgba(19, 27, 46, 0.9), rgba(13, 19, 34, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(99, 102, 241, 0.35);
+      box-shadow: 0 8px 30px -10px rgba(99, 102, 241, 0.15);
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.85); opacity: 0.8; }
+      70% { transform: scale(1.6); opacity: 0; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .live-dot::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+      background-color: inherit;
+      animation: pulse-ring 1.8s infinite;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-view {
+      animation: slideUp 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row selection:bg-indigo-500 selection:text-white">
+
+  <!-- TOAST / NOTIFICACIONES DEL SISTEMA (Sin alert/confirm) -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- MODAL DE INSTALACIÓN PWA -->
+  <div id="pwa-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="glass-panel rounded-2xl max-w-md w-full p-6 border border-indigo-500/30 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-white">Instalar OmniHub PWA</h3>
+            <p class="text-xs text-slate-400">Aplicación nativa Offline-First</p>
+          </div>
+        </div>
+        <button onclick="closePwaModal()" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-sm text-slate-300 mb-4 leading-relaxed">
+        Instala <strong>Manager Redes OmniHub</strong> directamente en tu dispositivo para trabajar sin conexión a internet, recibir alertas push de mensajes prioritarios y sincronizar automáticamente al recuperar red.
+      </p>
+      <div class="bg-slate-900/90 rounded-xl p-3.5 border border-slate-800 space-y-2.5 text-xs text-slate-300 mb-5">
+        <div class="flex items-center gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">✓</span>
+          <span>Service Worker & Caché Local IndexedDB activos</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">✓</span>
+          <span>Cola inteligente de publicaciones offline</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">✓</span>
+          <span>Ejecución independiente en Escritorio, iOS y Android</span>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="triggerNativePwaInstall()" class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          Instalar Ahora
+        </button>
+        <button onclick="closePwaModal()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-sm transition">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL VISTA PREVIA DE AUTORIZACIÓN OMNICANAL -->
+  <div id="approval-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass-panel rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-indigo-500/30 shadow-2xl">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-wider text-indigo-400">Protocolo de Autorización IA</span>
+          <h3 class="text-lg font-bold text-white">Vista Previa Adaptada por Red Social</h3>
+        </div>
+        <button onclick="closeApprovalModal()" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="approval-preview-grid" class="p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+        <!-- Generado dinámicamente -->
+      </div>
+      <div class="p-4 border-t border-slate-800 bg-slate-900/90 rounded-b-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs text-slate-400">
+          <i data-lucide="brain-circuit" class="w-4 h-4 text-indigo-400"></i>
+          <span>Aprobar entrena tu modelo de voz de marca (+3% Autonomía IA)</span>
+        </div>
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <button onclick="closeApprovalModal()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium">
+            Seguir Editando
+          </button>
+          <button onclick="confirmPublishOmniPost()" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span id="confirm-publish-btn-text">Autorizar y Publicar Ahora</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR DE NAVEGACIÓN -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-68 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-200 flex flex-col justify-between">
+    <div>
+      <!-- Logo -->
+      <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 via-purple-600 to-amber-500 flex items-center justify-center shadow-lg shadow-violet-500/25">
+            <i data-lucide="orbit" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h1 class="font-extrabold text-base tracking-tight text-white leading-none">OmniHub <span class="text-amber-400">AI</span></h1>
+            <p class="text-[11px] text-slate-400 font-mono mt-1">Manager Redes Pro</p>
+          </div>
+        </div>
+        <button onclick="toggleMobileSidebar()" class="lg:hidden p-1.5 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Selector Rápido de Marca Activa -->
+      <div class="mx-4 mt-3.5">
+        <label class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1">Identidad de Marca Activa</label>
+        <select id="sidebar-brand-selector" onchange="switchBrandPreset(this.value)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-violet-500/30 text-xs font-semibold text-amber-300 focus:outline-none focus:border-amber-400">
+          <!-- Renderizado dinámico JS -->
+        </select>
+      </div>
+
+      <!-- Nivel de Autonomía IA Mini-Widget -->
+      <div class="mx-4 mt-3 p-3.5 rounded-xl bg-gradient-to-br from-violet-950/60 to-slate-900 border border-violet-500/25">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="font-semibold text-violet-300 flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i> Autonomía Marca
+          </span>
+          <span id="sidebar-autonomy-pct" class="font-mono font-bold text-amber-300">42%</span>
+        </div>
+        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mb-2">
+          <div id="sidebar-autonomy-bar" class="h-full bg-gradient-to-r from-violet-500 to-amber-400 rounded-full transition-all duration-500" style="width: 42%"></div>
+        </div>
+        <div class="flex items-center justify-between text-[11px]">
+          <span id="sidebar-level-tag" class="text-slate-400 font-mono">Nivel 2</span>
+          <button onclick="toggleAutonomyMode()" id="sidebar-mode-badge" class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium hover:bg-amber-500/25 transition">
+            Confirmación 1-Clic
+          </button>
+        </div>
+      </div>
+
+      <!-- Menú Principal -->
+      <nav class="p-3 space-y-1 mt-2" id="main-nav">
+        <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium bg-violet-600/15 text-violet-300 border border-violet-500/30 transition">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Centro de Mando</span>
+        </button>
+        <button onclick="switchTab('profiles')" data-tab="profiles" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Marcas & Perfiles</span>
+        </button>
+        <button onclick="switchTab('studio')" data-tab="studio" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+          <span class="flex items-center gap-3"><i data-lucide="wand-2" class="w-4 h-4"></i> Estudio Omnicanal</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 font-mono">IA</span>
+        </button>
+        <button onclick="switchTab('humanizer')" data-tab="humanizer" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+          <span class="flex items-center gap-3"><i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> Escudo Anti-IA</span>
+          <span id="nav-humanizer-badge" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">ON</span>
+        </button>
+        <button onclick="switchTab('calendar')" data-tab="calendar" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+          <span class="flex items-center gap-3"><i data-lucide="calendar-days" class="w-4 h-4"></i> Calendario Editorial</span>
+          <span id="nav-queue-badge" class="hidden text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono">0</span>
+        </button>
+        <button onclick="switchTab('inbox')" data-tab="inbox" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+          <span class="flex items-center gap-3"><i data-lucide="inbox" class="w-4 h-4"></i> Bandeja Unificada</span>
+          <span id="nav-inbox-badge" class="text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-mono">4</span>
+        </button>
+        <button onclick="switchTab('trends')" data-tab="trends" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>Cazador Viral IA</span>
+        </button>
+        <button onclick="switchTab('live')" data-tab="live" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+          <span class="flex items-center gap-3"><i data-lucide="radio" class="w-4 h-4"></i> Multistream & Regalos</span>
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+        </button>
+        <button onclick="switchTab('ads')" data-tab="ads" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+          <i data-lucide="megaphone" class="w-4 h-4"></i>
+          <span>Campañas Ads Pro</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Footer Sidebar: Botón PWA -->
+    <div class="p-4 border-t border-slate-800/80 space-y-2.5">
+      <button onclick="openPwaModal()" class="w-full py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-indigo-600/20 border border-slate-700 hover:border-indigo-500/40 text-xs font-semibold text-slate-200 flex items-center justify-center gap-2 transition">
+        <i data-lucide="smartphone" class="w-4 h-4 text-indigo-400"></i>
+        <span>Instalar App (PWA)</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="flex-1 flex flex-col min-w-0">
+    
+    <!-- BARRA SUPERIOR (HEADER GLOBAL) -->
+    <header class="sticky top-0 z-30 glass-panel border-b border-slate-800/80 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <div>
+          <h2 id="header-title" class="text-base sm:text-lg font-bold text-white leading-tight">Centro de Mando Omnicanal</h2>
+          <p id="header-subtitle" class="text-xs text-slate-400 hidden sm:block">Sincronización unificada de redes, analítica y automatización IA</p>
+        </div>
+      </div>
+
+      <!-- Controles de Estado Online/Offline & Cola de Sincronización -->
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <!-- Indicador Cola Offline -->
+        <button onclick="syncOfflineQueue()" id="sync-queue-pill" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium hover:bg-amber-500/25 transition">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span><strong id="queue-count-text">0</strong> en cola</span>
+        </button>
+
+        <!-- Toggle Simulador Online / Offline -->
+        <button onclick="toggleNetworkSimulation()" id="network-status-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold transition cursor-pointer" title="Haz clic para simular modo Offline / Online">
+          <span id="network-dot" class="relative w-2 h-2 rounded-full bg-emerald-400 live-dot"></span>
+          <span id="network-label">Online • Sincronizado</span>
+        </button>
+
+        <!-- Acceso rápido a Crear -->
+        <button onclick="switchTab('studio')" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-indigo-600/25 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Nueva Publicación</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ÁREA DINÁMICA DE VISTAS -->
+    <main class="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto space-y-6">
+
+      <!-- ========================================================= -->
+      <!-- VISTA 1: DASHBOARD / CENTRO DE MANDO                      -->
+      <!-- ========================================================= -->
+      <section id="view-dashboard" class="view-section space-y-6 animate-view">
+        
+        <!-- Banner de Inteligencia Artificial y Voz de Marca -->
+        <div class="glass-card rounded-2xl p-5 border border-violet-500/30 bg-gradient-to-r from-violet-950/50 via-slate-900 to-amber-950/25 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-violet-500/20 border border-amber-400/30 flex items-center justify-center shrink-0">
+              <i data-lucide="brain-circuit" class="w-6 h-6 text-amber-400"></i>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="font-bold text-white text-base">Motor de Aprendizaje Progresivo • <span id="dash-brand-name" class="text-amber-300">NovaTech Studio</span></h3>
+                <span id="dash-mode-pill" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  Nivel 2 (40%-79%): Confirmación Rápida 1-Clic
+                </span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+                La IA ha analizado <strong id="ai-learned-posts" class="text-white">48 publicaciones</strong> de esta marca. Tono aprendido: <span id="dash-brand-tone" class="text-violet-300 font-medium">"Profesional, cercano, persuasivo y orientado a resultados"</span>. Escudo Anti-IA: <span class="text-emerald-400 font-semibold">Indetectable (&lt;3% huella IA)</span>.
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
+            <div class="text-right mr-1">
+              <div class="text-[11px] text-slate-400">Aprendizaje Marca</div>
+              <div id="dash-autonomy-val" class="text-xl font-extrabold text-amber-400 font-mono">42%</div>
+            </div>
+            <button onclick="trainBrandModelStep()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-amber-500/30 text-amber-300 text-xs font-semibold transition flex items-center gap-1.5" title="Simula aprobación y entrenamiento del modelo de marca">
+              <i data-lucide="graduation-cap" class="w-4 h-4"></i> +Entrenar (+12%)
+            </button>
+            <button onclick="toggleAutonomyMode()" class="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition shadow-lg shadow-violet-600/25 whitespace-nowrap">
+              Alternar Nivel Auto
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjetas KPIs Globales -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div class="glass-card rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-slate-400">Alcance Omnicanal Total</span>
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-extrabold text-white font-mono">1.48M</div>
+            <div class="flex items-center gap-1.5 mt-2 text-xs text-emerald-400">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+              <span>+24.8% vs semana anterior</span>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-slate-400">Tasa de Engagement Media</span>
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/15 text-cyan-400 flex items-center justify-center">
+                <i data-lucide="heart-handshake" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-extrabold text-white font-mono">8.64%</div>
+            <div class="flex items-center gap-1.5 mt-2 text-xs text-emerald-400">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+              <span>+1.9% impulsado por Reels/Shorts</span>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-slate-400">Regalos, SuperChat & Patreon</span>
+              <div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
+                <i data-lucide="gift" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div id="kpi-donations" class="text-2xl font-extrabold text-white font-mono">$3,840.50</div>
+            <div class="flex items-center gap-1.5 mt-2 text-xs text-amber-300">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>142 mecenas activos este mes</span>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-slate-400">ROAS Campañas Ads</span>
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl font-extrabold text-white font-mono">4.7x</div>
+            <div class="flex items-center gap-1.5 mt-2 text-xs text-emerald-400">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+              <span>Meta, Google & TikTok optimizados</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráficos y Estado de Redes Conectadas -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Gráfico de Rendimiento Unificado -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-2 flex flex-col">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 class="font-bold text-white text-sm">Rendimiento & Interacciones por Plataforma</h3>
+                <p class="text-xs text-slate-400">Comparativa semanal unificada en tiempo real</p>
+              </div>
+              <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300">Últimos 7 días</span>
+            </div>
+            <div class="relative flex-1 min-h-[250px] w-full">
+              <canvas id="omniPerformanceChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Ecosistema de Redes Conectadas -->
+          <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-white text-sm">Ecosistema Conectado</h3>
+                <button onclick="switchTab('profiles')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">Gestionar →</button>
+              </div>
+              <div id="dashboard-networks-list" class="space-y-2.5">
+                <!-- Se llena vía JS -->
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+              <span>API Webhooks & Local Cache</span>
+              <span class="text-emerald-400 font-mono">100% Operativo</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- VISTA 2: GESTOR DE PERFILES UNIFICADO ('UN SOLO COMANDO') -->
+      <!-- ========================================================= -->
+      <section id="view-profiles" class="view-section hidden space-y-6 animate-view">
+        
+        <!-- Biblioteca de Perfiles de Marca y Estilos Publicitarios -->
+        <div class="glass-card rounded-2xl p-5 border border-amber-500/25">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <span class="text-[11px] font-mono uppercase tracking-wider text-amber-400">Memoria de Identidad & Estilo Publicitario</span>
+              <h3 class="font-bold text-white text-base">Perfiles de Marca Aprendidos</h3>
+              <p class="text-xs text-slate-400">Selecciona una marca preconfigurada o crea una nueva para que la IA adapte vocabulario, emojis y estructura</p>
+            </div>
+            <button onclick="openNewBrandForm()" class="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Crear Nueva Marca
+            </button>
+          </div>
+
+          <!-- Formulario rápido Nueva Marca (Oculto por defecto) -->
+          <div id="new-brand-form" class="hidden mb-4 p-4 rounded-xl bg-slate-950/90 border border-violet-500/30 grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <input type="text" id="new-brand-name" placeholder="Nombre de Marca (ej: Aura Spa)" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none" />
+            <input type="text" id="new-brand-tone" placeholder="Tono (ej: Cálido, sensorial, holístico)" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none" />
+            <input type="text" id="new-brand-emojis" placeholder="Emojis clave (ej: ✨🌿🕯️)" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none" />
+            <div class="flex gap-2">
+              <button onclick="saveNewBrandPreset()" class="flex-1 py-2 px-3 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold">Guardar Marca</button>
+              <button onclick="document.getElementById('new-brand-form').classList.add('hidden')" class="py-2 px-2.5 rounded-lg bg-slate-800 text-slate-400 text-xs">✕</button>
+            </div>
+          </div>
+
+          <div id="brand-presets-grid" class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            <!-- Renderizado dinámico JS -->
+          </div>
+        </div>
+
+        <!-- Conexiones Activas / Inactivas -->
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="font-bold text-white text-base">Canales y Cuentas Vinculadas</h3>
+              <p class="text-xs text-slate-400">Activa o desactiva la sincronización en tiempo real para cada plataforma</p>
+            </div>
+            <span class="text-xs font-mono text-violet-300 bg-violet-500/10 border border-violet-500/20 px-3 py-1 rounded-lg">
+              Sincronización Multi-API Activa
+            </span>
+          </div>
+          <div id="profiles-connection-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- Renderizado dinámico JS -->
+          </div>
+        </div>
+
+        <!-- Editor Maestro de Perfil ('Un Solo Comando') -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="glass-card rounded-2xl p-5 lg:col-span-5 space-y-4">
+            <div class="flex items-center gap-2.5 border-b border-slate-800 pb-3">
+              <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                <i data-lucide="terminal" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Comando Maestro de Identidad</h3>
+                <p class="text-xs text-slate-400">Edita una vez y adapta automáticamente a todas</p>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">Nombre de Marca / Creador</label>
+              <input type="text" id="master-profile-name" value="NovaTech Studio" oninput="updateProfilePreviews()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">Biografía Base (La IA ajustará límites y tono)</label>
+              <textarea id="master-profile-bio" rows="3" oninput="updateProfilePreviews()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-indigo-500">Transformamos ideas en experiencias digitales con IA, automatización y diseño de alto impacto. Únete a nuestra comunidad global.</textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1.5">Enlace Principal (Bio Link)</label>
+                <input type="text" id="master-profile-link" value="https://omnihub.io/novatech" oninput="updateProfilePreviews()" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-cyan-300 font-mono focus:outline-none focus:border-indigo-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1.5">Estilo de Avatar</label>
+                <select id="master-profile-avatar" onchange="updateProfilePreviews()" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+                  <option value="https://placehold.co/150x150/4f46e5/ffffff?text=NT">Gradiente Índigo (Oficial)</option>
+                  <option value="https://placehold.co/150x150/0891b2/ffffff?text=AI">Cian Futurista (Lanzamiento)</option>
+                  <option value="https://placehold.co/150x150/e11d48/ffffff?text=LIVE">Carmesí (Edición Especial)</option>
+                </select>
+              </div>
+            </div>
+
+            <button onclick="applyMasterProfileToAll()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+              Ejecutar Comando: Actualizar Todos los Perfiles
+            </button>
+          </div>
+
+          <!-- Vista Previa Adaptada Lado a Lado -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-7 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-white text-sm">Adaptación IA en Tiempo Real por Red</h3>
+                <p class="text-xs text-slate-400">Ajuste automático de caracteres, emojis, hashtags y dimensiones de avatar</p>
+              </div>
+              <span class="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300">Auto-Formato</span>
+            </div>
+            <div id="profile-adaptations-preview" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 overflow-y-auto max-h-[430px] pr-1">
+              <!-- Renderizado dinámico JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- VISTA 3: ESTUDIO DE CREACIÓN OMNICANAL & ADAPTACIÓN IA    -->
+      <!-- ========================================================= -->
+      <section id="view-studio" class="view-section hidden space-y-6 animate-view">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Panel Izquierdo: Compositor Multimedia & Tono -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-7 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div>
+                <h3 class="font-bold text-white text-base">Compositor Omnicanal Inteligente</h3>
+                <p class="text-xs text-slate-400">Crea una pieza maestra; la IA la adapta manteniendo el tono de tu marca</p>
+              </div>
+              <!-- Selector de Tono -->
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400">Tono:</span>
+                <select id="post-tone-selector" onchange="liveAdaptStudioCopies()" class="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-indigo-300 font-medium focus:outline-none">
+                  <option value="marca">Fiel a la Marca (Aprendido)</option>
+                  <option value="viral">Gancho Viral / Alto Impacto</option>
+                  <option value="educativo">Educativo / Autoridad</option>
+                  <option value="venta">Conversión / Oferta Directa</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Selector de Formato Multimedia -->
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-2">Formato Multimedia Integrado</label>
+              <div class="grid grid-cols-5 gap-2" id="media-type-buttons">
+                <button type="button" onclick="selectMediaType('text')" data-media="text" class="media-btn py-2 px-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 text-xs font-medium flex flex-col items-center gap-1 hover:border-indigo-500 transition">
+                  <i data-lucide="align-left" class="w-4 h-4"></i> Texto
+                </button>
+                <button type="button" onclick="selectMediaType('image')" data-media="image" class="media-btn py-2 px-2 rounded-xl bg-indigo-600/20 border border-indigo-500 text-indigo-300 text-xs font-semibold flex flex-col items-center gap-1 transition">
+                  <i data-lucide="image" class="w-4 h-4"></i> Imagen
+                </button>
+                <button type="button" onclick="selectMediaType('video')" data-media="video" class="media-btn py-2 px-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 text-xs font-medium flex flex-col items-center gap-1 hover:border-indigo-500 transition">
+                  <i data-lucide="video" class="w-4 h-4"></i> Video
+                </button>
+                <button type="button" onclick="selectMediaType('audio')" data-media="audio" class="media-btn py-2 px-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 text-xs font-medium flex flex-col items-center gap-1 hover:border-indigo-500 transition">
+                  <i data-lucide="mic" class="w-4 h-4"></i> Audio
+                </button>
+                <button type="button" onclick="selectMediaType('gif')" data-media="gif" class="media-btn py-2 px-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 text-xs font-medium flex flex-col items-center gap-1 hover:border-indigo-500 transition">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i> GIF
+                </button>
+              </div>
+            </div>
+
+            <!-- Editor de Copy Maestro -->
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                <label class="text-xs font-medium text-slate-300">Idea o Mensaje Principal</label>
+                <div class="flex items-center gap-2">
+                  <button onclick="humanizeStudioCopyDirect()" class="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1 font-semibold bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/30 transition">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Humanizar (Anti-IA)
+                  </button>
+                  <button onclick="enhanceCopyWithAI()" class="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 font-medium">
+                    <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> Optimizar Copy
+                  </button>
+                </div>
+              </div>
+              <textarea id="studio-master-copy" rows="4" oninput="liveAdaptStudioCopies()" placeholder="Escribe tu mensaje aquí o selecciona una tendencia viral..." class="w-full p-3.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-violet-500">Acabamos de lanzar nuestra nueva arquitectura de automatización con IA. Ahorra 15 horas semanales gestionando todas tus comunidades desde un solo lugar. ¿Listo para escalar?</textarea>
+              
+              <!-- Barra en vivo de Detección de IA en el Estudio -->
+              <div class="mt-2 p-2.5 rounded-xl bg-slate-950/90 border border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-3">
+                  <span class="text-slate-400 flex items-center gap-1">
+                    <i data-lucide="scan-search" class="w-3.5 h-3.5 text-violet-400"></i> Detección IA:
+                  </span>
+                  <span id="studio-ai-score-badge" class="font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300">24% IA • 76% Humano</span>
+                  <span id="studio-perplexity-tag" class="hidden sm:inline text-[11px] font-mono text-slate-400">Perplejidad: Media</span>
+                </div>
+                <label class="cursor-pointer flex items-center gap-1.5 text-[11px] font-semibold text-emerald-300">
+                  <input type="checkbox" id="auto-humanize-pipeline" checked onchange="toggleAutoHumanizePipeline(this.checked)" class="accent-emerald-500">
+                  <span>Filtro Indetectable Auto</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Programación o Publicación Inmediata -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Momento de Publicación</label>
+                <select id="studio-schedule-mode" onchange="toggleScheduleInput()" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none">
+                  <option value="now">Publicar Inmediatamente (Tras Aprobación)</option>
+                  <option value="schedule">Programar en Calendario Editorial</option>
+                </select>
+              </div>
+              <div id="studio-datetime-wrapper" class="hidden">
+                <label class="block text-xs font-medium text-slate-400 mb-1">Fecha y Hora Programada</label>
+                <input type="datetime-local" id="studio-schedule-datetime" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel Derecho: Selector Granular de Destinos & Ubicaciones -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-5 flex flex-col justify-between space-y-5">
+            <div class="space-y-4">
+              <div class="border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-white text-base">Destinos y Formatos por Red</h3>
+                <p class="text-xs text-slate-400">Elige exactamente dónde publicar en cada plataforma</p>
+              </div>
+
+              <!-- Acordeón / Tarjetas de Destinos Granulares -->
+              <div class="space-y-3 max-h-[430px] overflow-y-auto pr-1" id="granular-destinations-list">
+                <!-- Instagram -->
+                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-pink-400 flex items-center gap-2">
+                      <i data-lucide="instagram" class="w-4 h-4"></i> Instagram
+                    </span>
+                    <span class="text-[10px] text-slate-500 font-mono">4:5 / 9:16</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-pink-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-pink-500" data-net="Instagram" data-place="Feed" checked onchange="liveAdaptStudioCopies()"> Feed
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-pink-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-pink-500" data-net="Instagram" data-place="Reels" checked onchange="liveAdaptStudioCopies()"> Reels
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-pink-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-pink-500" data-net="Instagram" data-place="Historias" onchange="liveAdaptStudioCopies()"> Historias
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Facebook -->
+                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-blue-400 flex items-center gap-2">
+                      <i data-lucide="facebook" class="w-4 h-4"></i> Facebook
+                    </span>
+                    <span class="text-[10px] text-slate-500 font-mono">Página Oficial</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-blue-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-blue-500" data-net="Facebook" data-place="Muro" checked onchange="liveAdaptStudioCopies()"> Muro
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-blue-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-blue-500" data-net="Facebook" data-place="Reels" onchange="liveAdaptStudioCopies()"> Reels
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-blue-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-blue-500" data-net="Facebook" data-place="Historias" onchange="liveAdaptStudioCopies()"> Historias
+                    </label>
+                  </div>
+                </div>
+
+                <!-- TikTok -->
+                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-cyan-400 flex items-center gap-2">
+                      <i data-lucide="music-2" class="w-4 h-4"></i> TikTok
+                    </span>
+                    <span class="text-[10px] text-slate-500 font-mono">9:16 Vertical</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-cyan-500" data-net="TikTok" data-place="Video Corto" checked onchange="liveAdaptStudioCopies()"> Video Corto
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-cyan-500" data-net="TikTok" data-place="Historias" onchange="liveAdaptStudioCopies()"> Historias
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-cyan-500" data-net="TikTok" data-place="Promo Live" onchange="liveAdaptStudioCopies()"> Anuncio Live
+                    </label>
+                  </div>
+                </div>
+
+                <!-- YouTube -->
+                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-red-400 flex items-center gap-2">
+                      <i data-lucide="youtube" class="w-4 h-4"></i> YouTube
+                    </span>
+                    <span class="text-[10px] text-slate-500 font-mono">16:9 / 9:16</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-red-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-red-500" data-net="YouTube" data-place="Shorts" checked onchange="liveAdaptStudioCopies()"> Shorts
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-red-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-red-500" data-net="YouTube" data-place="Video Largo" onchange="liveAdaptStudioCopies()"> Video Largo
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-red-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-red-500" data-net="YouTube" data-place="Comunidad" onchange="liveAdaptStudioCopies()"> Comunidad
+                    </label>
+                  </div>
+                </div>
+
+                <!-- WhatsApp Business -->
+                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-emerald-400 flex items-center gap-2">
+                      <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp Business
+                    </span>
+                    <span class="text-[10px] text-slate-500 font-mono">Directo</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-emerald-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-emerald-500" data-net="WhatsApp" data-place="Estados" checked onchange="liveAdaptStudioCopies()"> Estados
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-1.5 text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-emerald-500/50">
+                      <input type="checkbox" class="dest-checkbox accent-emerald-500" data-net="WhatsApp" data-place="Canal de Difusión" onchange="liveAdaptStudioCopies()"> Canal de Difusión
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botón de Ejecución con Flujo de Autorización -->
+            <div class="pt-3 border-t border-slate-800 space-y-2.5">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>Destinos seleccionados:</span>
+                <span id="selected-dest-counter" class="font-mono font-bold text-violet-400">5 ubicaciones</span>
+              </div>
+              <button onclick="initiateOmniPublishFlow()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-amber-600 hover:from-violet-500 hover:to-amber-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xl shadow-violet-600/30 transition">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span id="studio-action-label">Generar Vista Previa y Autorizar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- VISTA 3B: LABORATORIO & ESCUDO ANTI-DETECCIÓN DE IA       -->
+      <!-- ========================================================= -->
+      <section id="view-humanizer" class="view-section hidden space-y-6 animate-view">
+        <!-- Cabecera del Escudo Anti-IA -->
+        <div class="glass-card rounded-2xl p-5 border border-amber-500/30 bg-gradient-to-r from-slate-900 via-violet-950/40 to-amber-950/20 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="flex items-start gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center shrink-0">
+              <i data-lucide="shield-check" class="w-6 h-6 text-amber-400"></i>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="font-bold text-white text-base">Escudo Anti-Detección de IA & Humanizador Orgánico</h3>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-mono font-bold">Bypass GPTZero / Originality / Meta AI</span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                Elimina patrones sintácticos robóticos, ajusta la perplejidad léxica y varía la cadencia de oraciones (Burstiness) respetando el tono exacto de <strong id="hum-active-brand-label" class="text-amber-300">NovaTech Studio</strong>.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 self-end lg:self-center">
+            <label class="cursor-pointer flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-200">
+              <input type="checkbox" id="global-humanizer-shield-toggle" checked onchange="toggleAutoHumanizePipeline(this.checked)" class="accent-amber-500 w-4 h-4">
+              <span>Protección Global Activa</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Métricas Forenses del Texto -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs text-slate-400 mb-1">Probabilidad de IA</div>
+            <div id="hum-metric-ai" class="text-2xl font-extrabold font-mono text-rose-400">78%</div>
+            <div id="hum-metric-ai-sub" class="text-[11px] text-rose-300/80 mt-1">Riesgo alto de penalización</div>
+          </div>
+          <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs text-slate-400 mb-1">Naturalidad Humana</div>
+            <div id="hum-metric-human" class="text-2xl font-extrabold font-mono text-emerald-400">22%</div>
+            <div id="hum-metric-human-sub" class="text-[11px] text-slate-400 mt-1">Objetivo: &gt; 96% Humano</div>
+          </div>
+          <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs text-slate-400 mb-1">Perplejidad (Perplexity)</div>
+            <div id="hum-metric-perplexity" class="text-2xl font-extrabold font-mono text-violet-400">28.4</div>
+            <div class="text-[11px] text-slate-400 mt-1">Variedad léxica y giros</div>
+          </div>
+          <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs text-slate-400 mb-1">Ráfaga Sintáctica (Burstiness)</div>
+            <div id="hum-metric-burstiness" class="text-2xl font-extrabold font-mono text-amber-400">Baja</div>
+            <div class="text-[11px] text-slate-400 mt-1">Contraste frases cortas/largas</div>
+          </div>
+        </div>
+
+        <!-- Comparador Lado a Lado: Texto Original vs Humanizado Indetectable -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Columna Izquierda: Entrada y Huellas Detectadas -->
+          <div class="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                  <i data-lucide="file-warning" class="w-4 h-4 text-rose-400"></i> Borrador Original / Generado por IA
+                </h4>
+                <button onclick="loadRobotSampleText()" class="text-[11px] text-violet-400 hover:text-violet-300 underline">Cargar Ejemplo Robótico</button>
+              </div>
+              <textarea id="humanizer-input-text" rows="6" oninput="analyzeTextForAI(this.value)" class="w-full p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-200 focus:outline-none focus:border-violet-500 leading-relaxed">En el vertiginoso mundo actual, es fundamental destacar que la inteligencia artificial está revolucionando el panorama digital. Asimismo, permite optimizar los flujos de trabajo de manera integral, brindando soluciones innovadoras para potenciar el crecimiento sostenible de tu marca en todas las plataformas.</textarea>
+
+              <!-- Huellas Robóticas Detectadas -->
+              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Huellas Sintácticas Detectadas:</div>
+                <div id="robotic-footprints-tags" class="flex flex-wrap gap-1.5">
+                  <!-- Generado dinámicamente por JS -->
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5 pt-2">
+              <select id="humanizer-intensity" class="px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none">
+                <option value="balanced">Nivel: Natural Equilibrado (Marca)</option>
+                <option value="conversational">Nivel: Coloquial Cercano (Redes)</option>
+                <option value="stealth">Nivel: Sigilo Máximo (&lt;1% IA)</option>
+              </select>
+              <button onclick="runHumanizerEngine()" class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-violet-600 hover:from-amber-400 hover:to-violet-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition">
+                <i data-lucide="sparkles" class="w-4 h-4"></i> Humanizar y Hacer Indetectable
+              </button>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Resultado Indetectable Verificado -->
+          <div class="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4 border border-emerald-500/25">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> Versión Humanizada Indetectable
+                </h4>
+                <span id="hum-output-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[11px] font-mono font-bold">
+                  98.4% Humano • 1.6% IA
+                </span>
+              </div>
+              <textarea id="humanizer-output-text" rows="6" class="w-full p-3.5 rounded-xl bg-slate-950 border border-emerald-500/30 text-sm text-white focus:outline-none leading-relaxed">Hoy todo cambia demasiado rápido, y seamos honestos: seguir gestionando redes a mano ya no da. Cuando conectas bien la IA a tu flujo diario, recuperas horas reales de trabajo sin sonar como un robot ni perder lo que hace única a tu marca.</textarea>
+
+              <div class="p-3 rounded-xl bg-emerald-950/25 border border-emerald-500/20 text-xs text-emerald-200/90 space-y-1">
+                <div class="font-semibold text-emerald-300 flex items-center gap-1.5">
+                  <i data-lucide="shield" class="w-3.5 h-3.5"></i> Certificación de Autenticidad Aplicada:
+                </div>
+                <p id="hum-transformation-notes" class="text-[11px] text-slate-300">
+                  Se eliminaron 4 clichés de LLM ("vertiginoso mundo", "es fundamental destacar", "asimismo", "de manera integral"), se introdujo ritmo conversacional y se conservó el tono de marca.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2.5 pt-2">
+              <button onclick="sendHumanizedToStudio()" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition">
+                <i data-lucide="send" class="w-4 h-4"></i> Enviar al Estudio Omnicanal
+              </button>
+              <button onclick="copyHumanizedText()" class="py-2.5 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1.5 transition">
+                <i data-lucide="copy" class="w-4 h-4"></i> Copiar
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- VISTA 4: CALENDARIO EDITORIAL SEMANAL/MENSUAL             -->
+      <!-- ========================================================= -->
+      <section id="view-calendar" class="view-section hidden space-y-6 animate-view">
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div>
+              <h3 class="font-bold text-white text-base">Calendario Editorial Semanal & Cola Offline</h3>
+              <p class="text-xs text-slate-400">Visualiza, reprograma o sincroniza publicaciones en todas tus redes</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="syncOfflineQueue()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-amber-300 border border-amber-500/30 flex items-center gap-1.5">
+                <i data-lucide="cloud-upload" class="w-4 h-4"></i> Sincronizar Cola
+              </button>
+              <button onclick="switchTab('studio')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white flex items-center gap-1.5">
+                <i data-lucide="plus" class="w-4 h-4"></i> Programar Post
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid de 7 Días de la Semana -->
+          <div id="weekly-calendar-grid" class="grid grid-cols-1 md:grid-cols-7 gap-3">
+            <!-- Generado por JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- VISTA 5: BANDEJA DE ENTRADA UNIFICADA (INBOX OMNICANAL)   -->
+      <!-- ========================================================= -->
+      <section id="view-inbox" class="view-section hidden space-y-6 animate-view">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Lista de Mensajes y Comentarios Prioritarios -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-5 flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-white text-base">Inbox Omnicanal</h3>
+              <div class="flex gap-1.5">
+                <button onclick="filterInbox('all')" class="inbox-filter px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-[11px] font-medium">Todos</button>
+                <button onclick="filterInbox('vip')" class="inbox-filter px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 text-[11px] font-medium hover:bg-slate-700">Prioritarios</button>
+              </div>
+            </div>
+            <div id="inbox-messages-list" class="space-y-2.5 overflow-y-auto max-h-[480px] pr-1">
+              <!-- Renderizado por JS -->
+            </div>
+          </div>
+
+          <!-- Panel de Conversación y Respuesta Asistida por IA -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-7 flex flex-col justify-between min-h-[450px]">
+            <div id="inbox-conversation-detail">
+              <!-- Renderizado por JS -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 space-y-3">
+              <!-- Sugerencias Rápidas IA -->
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-[11px] text-indigo-400 font-semibold flex items-center gap-1">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Respuestas IA:
+                </span>
+                <button onclick="useAiQuickReply('¡Hola! Muchas gracias por escribirnos. Te envío el enlace directo con toda la info ahora mismo 🚀')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-indigo-600/30 text-slate-300 border border-slate-700 transition">
+                  Enviar Info + Enlace
+                </button>
+                <button onclick="useAiQuickReply('¡Qué alegría leer esto! Gracias por ser parte de nuestra comunidad y apoyar el contenido ❤️')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-indigo-600/30 text-slate-300 border border-slate-700 transition">
+                  Agradecer Apoyo
+                </button>
+              </div>
+
+              <div class="flex gap-2">
+                <input type="text" id="inbox-reply-input" placeholder="Escribe una respuesta unificada que se enviará a su red de origen..." class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-indigo-500" />
+                <button onclick="sendInboxReply()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm flex items-center gap-1.5 transition">
+                  <i data-lucide="send" class="w-4 h-4"></i> Enviar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- VISTA 6: ASISTENTE IA & CAZADOR DE TENDENCIAS VIRALES     -->
+      <!-- ========================================================= -->
+      <section id="view-trends" class="view-section hidden space-y-6 animate-view">
+        <div class="glass-card rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900">
+          <div>
+            <span class="text-xs font-mono text-cyan-400 uppercase tracking-wider">Radar Predictivo en Tiempo Real</span>
+            <h3 class="text-lg font-bold text-white mt-0.5">Cazador de Tendencias & Generador de Guiones Virales</h3>
+            <p class="text-xs text-slate-400">Analizamos millones de señales en TikTok, Reels, Shorts y X para detectar olas antes de su pico</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="trend-niche-select" onchange="renderViralTrends()" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none">
+              <option value="all">Todos los Nichos</option>
+              <option value="tech">Tecnología & IA</option>
+              <option value="negocios">Negocios & Marketing</option>
+              <option value="lifestyle">Creadores & Lifestyle</option>
+            </select>
+            <button onclick="scanNewTrends()" class="px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-cyan-600/20">
+              <i data-lucide="radar" class="w-4 h-4"></i> Escanear Ahora
+            </button>
+          </div>
+        </div>
+
+        <div id="viral-trends-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Renderizado por JS -->
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- VISTA 7: MULTISTREAM LIVE & MONETIZACIÓN (REGALOS/PATREON)-->
+      <!-- ========================================================= -->
+      <section id="view-live" class="view-section hidden space-y-6 animate-view">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Estudio de Transmisión Simultánea -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-7 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <span id="live-status-badge" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-slate-400"></span> STANDBY
+                </span>
+                <h3 class="font-bold text-white text-base">Estudio Multistream Simultáneo</h3>
+              </div>
+              <button onclick="toggleMultistreamLive()" id="btn-toggle-live" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-rose-600/30 transition">
+                <i data-lucide="radio" class="w-4 h-4"></i> Iniciar Live en 4 Redes
+              </button>
+            </div>
+
+            <!-- Pantalla de Transmisión Simulada -->
+            <div class="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 aspect-video flex flex-col items-center justify-center p-6 text-center">
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.18),transparent_70%)]"></div>
+              
+              <!-- Overlay superior -->
+              <div class="absolute top-3 left-3 right-3 flex items-center justify-between text-xs z-10">
+                <div class="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
+                  <i data-lucide="users" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  <span id="live-viewers-count" class="font-mono font-bold text-white">0</span>
+                  <span class="text-slate-400">espectadores</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-white/10 text-[11px]">
+                  <span class="text-pink-400 font-bold">IG</span> •
+                  <span class="text-cyan-400 font-bold">TT</span> •
+                  <span class="text-red-400 font-bold">YT</span> •
+                  <span class="text-blue-400 font-bold">FB</span>
+                </div>
+              </div>
+
+              <!-- Centro de Cámara Simulada -->
+              <div class="relative z-10 space-y-2">
+                <div class="w-16 h-16 rounded-full bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center mx-auto">
+                  <i data-lucide="video" class="w-8 h-8 text-indigo-400"></i>
+                </div>
+                <h4 id="live-stream-headline" class="font-bold text-white text-base">Señal Lista para Multistream RTMP</h4>
+                <p class="text-xs text-slate-400 max-w-md">Codificación adaptativa 1080p60 simultánea hacia TikTok Live, Instagram Live, YouTube Live y Facebook.</p>
+              </div>
+
+              <!-- Alerta Flotante de Regalo / Donación -->
+              <div id="live-gift-banner" class="hidden absolute bottom-4 left-4 right-4 z-20 p-3 rounded-xl bg-gradient-to-r from-amber-500/90 to-pink-600/90 backdrop-blur-md text-white shadow-xl flex items-center justify-between animate-bounce">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-2xl">🎁</span>
+                  <div class="text-left">
+                    <div id="live-gift-user" class="text-xs font-extrabold">Carlos_Dev envió León Dorado (TikTok)</div>
+                    <div id="live-gift-msg" class="text-[11px] text-white/90">"¡Brutal contenido, sigan así!"</div>
+                  </div>
+                </div>
+                <span id="live-gift-amount" class="font-mono font-extrabold text-sm bg-black/30 px-2.5 py-1 rounded-lg">+$25.00</span>
+              </div>
+            </div>
+
+            <!-- Simulador de Interacción y Regalos -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <span class="text-xs text-slate-400">Simular ingreso en vivo:</span>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="simulateLiveGift('TikTok Gift 🌹', 'Sofía_M', 15)" class="px-3 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-medium hover:bg-cyan-500/25">
+                  + Regalo TikTok ($15)
+                </button>
+                <button onclick="simulateLiveGift('YouTube SuperChat ⭐', 'TechMaster', 50)" class="px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-medium hover:bg-red-500/25">
+                  + SuperChat YT ($50)
+                </button>
+                <button onclick="simulateLiveGift('Suscripción Patreon 👑', 'Elena_R', 25)" class="px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium hover:bg-amber-500/25">
+                  + Mecenas Patreon ($25)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Unificado en Vivo & Meta de Recaudación -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-5 flex flex-col justify-between space-y-4">
+            <!-- Meta Patreon / Donaciones -->
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-amber-500/25">
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="font-bold text-amber-300 flex items-center gap-1.5">
+                  <i data-lucide="trophy" class="w-4 h-4"></i> Meta Comunidad & Patreon
+                </span>
+                <span id="live-goal-text" class="font-mono font-bold text-white">$3,840 / $5,000</span>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div id="live-goal-bar" class="h-full bg-gradient-to-r from-amber-500 to-pink-500 rounded-full transition-all duration-500" style="width: 76.8%"></div>
+              </div>
+            </div>
+
+            <!-- Feed de Chat Unificado -->
+            <div class="flex-1 flex flex-col min-h-[260px]">
+              <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Chat Unificado Multi-Plataforma</h4>
+              <div id="live-chat-feed" class="flex-1 bg-slate-950/80 rounded-xl border border-slate-800 p-3 space-y-2 overflow-y-auto max-h-[260px] text-xs">
+                <div class="text-slate-400"><span class="text-pink-400 font-bold">[IG] @laura.ux:</span> ¡Esperando con ansias este directo! 🔥</div>
+                <div class="text-slate-400"><span class="text-red-400 font-bold">[YT] Marcos Tech:</span> Saludando desde Chile 🇨🇱</div>
+                <div class="text-slate-400"><span class="text-cyan-400 font-bold">[TT] @diego_ai:</span> ¿Van a mostrar la automatización hoy?</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- VISTA 8: GESTOR DE CAMPAÑAS PUBLICITARIAS (ADS MANAGER)   -->
+      <!-- ========================================================= -->
+      <section id="view-ads" class="view-section hidden space-y-6 animate-view">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Creador Rápido de Campaña Unificada -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-4 space-y-4">
+            <div class="border-b border-slate-800 pb-3">
+              <h3 class="font-bold text-white text-base">Lanzar Campaña Ads IA</h3>
+              <p class="text-xs text-slate-400">Distribuye presupuesto inteligente en Meta, Google y TikTok</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Nombre de la Campaña</label>
+              <input type="text" id="ad-campaign-name" placeholder="Ej: Lanzamiento Q4 - Conversión" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Plataforma Publicitaria</label>
+              <select id="ad-platform-select" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none">
+                <option value="Meta Ads (FB + IG)">Meta Ads (Facebook + Instagram)</option>
+                <option value="Google Ads (Search + YouTube)">Google Ads (Search + YouTube)</option>
+                <option value="TikTok Ads">TikTok Ads (Spark & In-Feed)</option>
+                <option value="Omnicanal IA (Todas)">Distribución Automática IA (Todas)</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Objetivo</label>
+                <select id="ad-objective-select" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none">
+                  <option value="Conversiones">Conversiones / Ventas</option>
+                  <option value="Tráfico Web">Tráfico Web</option>
+                  <option value="Leads">Generación de Leads</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Presupuesto Diario ($)</label>
+                <input type="number" id="ad-budget-input" value="120" min="10" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-mono focus:outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Segmentación Inteligente</label>
+              <input type="text" id="ad-audience-input" value="Emprendedores, Tech, Marketing Digital (24-48 años)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-none" />
+            </div>
+
+            <button onclick="createNewAdCampaign()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition">
+              <i data-lucide="rocket" class="w-4 h-4"></i> Activar Campaña Publicitaria
+            </button>
+          </div>
+
+          <!-- Tabla / Monitoreo de Campañas Activas -->
+          <div class="glass-card rounded-2xl p-5 lg:col-span-8 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-white text-base">Rendimiento de Campañas Activas</h3>
+                <p class="text-xs text-slate-400">Optimización automática de puja y retorno (ROAS)</p>
+              </div>
+              <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                Píxel Omnicanal Verificado
+              </span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-800 text-[11px] uppercase text-slate-400 font-mono">
+                    <th class="py-3 px-2">Campaña</th>
+                    <th class="py-3 px-2">Plataforma</th>
+                    <th class="py-3 px-2">Presupuesto</th>
+                    <th class="py-3 px-2">CTR</th>
+                    <th class="py-3 px-2">ROAS</th>
+                    <th class="py-3 px-2 text-right">Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="ads-campaigns-tbody" class="divide-y divide-slate-800/60 text-xs">
+                  <!-- Renderizado por JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- LÓGICA DE APLICACIÓN COMPLETA & ARQUITECTURA OFFLINE-FIRST -->
+  <script>
+    // =========================================================================
+    // 1. ESTADO GLOBAL PERSISTENTE (LOCALSTORAGE / SIMULACIÓN SERVICE WORKER)
+    // =========================================================================
+    const STORAGE_KEY = 'omnihub_enterprise_state_v1';
+
+    const defaultState = {
+      isOnline: true,
+      autonomyPercent: 42,
+      autoPilotMode: false,
+      autoHumanizeEnabled: true,
+      activeBrandId: 'novatech',
+      learnedPostsCount: 48,
+      donationsTotal: 3840.50,
+      offlineQueue: [],
+      brandPresets: [
+        {
+          id: 'novatech',
+          name: 'NovaTech Studio',
+          category: 'Marca Personal / Tech',
+          tone: 'Profesional, cercano, persuasivo y orientado a resultados',
+          emojis: '🚀⚡💡🔥',
+          vocabulary: ['escalar', 'flujo real', 'sin fricción', 'arquitectura'],
+          bio: 'Transformamos ideas en experiencias digitales con IA, automatización y diseño de alto impacto. Únete a nuestra comunidad global.',
+          link: 'https://omnihub.io/novatech'
+        },
+        {
+          id: 'bienestar',
+          name: 'Alma & Equilibrio',
+          category: 'Bienestar & Terapias',
+          tone: 'Cálido, empático, sereno y profundamente humano',
+          emojis: '🌿✨🤍🕊️',
+          vocabulary: ['calma interior', 'respirar', 'sanación consciente', 'tu espacio'],
+          bio: 'Acompañamos tu proceso de bienestar integral con terapias holísticas, mindfulness y herramientas para volver a tu centro.',
+          link: 'https://omnihub.io/alma-equilibrio'
+        },
+        {
+          id: 'eventos',
+          name: 'Vértigo Live Fest',
+          category: 'Productora de Eventos',
+          tone: 'Vibrante, urgente, exclusivo y lleno de adrenalina',
+          emojis: '🎟️🔥🎶⚡',
+          vocabulary: ['sold out', 'experiencia única', 'en vivo', 'preventa'],
+          bio: 'Creamos festivales, experiencias inmersivas y noches inolvidables en toda Latinoamérica. Asegura tus entradas antes que vuelen.',
+          link: 'https://omnihub.io/vertigo-fest'
+        }
+      ],
+      networks: [
+        { id: 'instagram', name: 'Instagram', handle: '@novatech.studio', connected: true, followers: '248K', color: 'text-pink-400', badgeBg: 'bg-pink-500/15', limit: 2200 },
+        { id: 'facebook', name: 'Facebook', handle: 'NovaTech Official', connected: true, followers: '412K', color: 'text-blue-400', badgeBg: 'bg-blue-500/15', limit: 5000 },
+        { id: 'tiktok', name: 'TikTok', handle: '@novatech_ai', connected: true, followers: '530K', color: 'text-cyan-400', badgeBg: 'bg-cyan-500/15', limit: 300 },
+        { id: 'youtube', name: 'YouTube', handle: 'NovaTech TV', connected: true, followers: '195K', color: 'text-red-400', badgeBg: 'bg-red-500/15', limit: 1000 },
+        { id: 'whatsapp', name: 'WhatsApp Business', handle: '+56 9 8765 4321', connected: true, followers: '38K Susc.', color: 'text-emerald-400', badgeBg: 'bg-emerald-500/15', limit: 700 },
+        { id: 'x', name: 'X (Twitter)', handle: '@novatech_io', connected: true, followers: '94K', color: 'text-slate-200', badgeBg: 'bg-slate-700/40', limit: 280 },
+        { id: 'linkedin', name: 'LinkedIn', handle: 'NovaTech Corp', connected: false, followers: '61K', color: 'text-sky-400', badgeBg: 'bg-sky-500/15', limit: 1300 },
+        { id: 'patreon', name: 'Patreon', handle: 'patreon.com/novatech', connected: true, followers: '142 Mecenas', color: 'text-amber-400', badgeBg: 'bg-amber-500/15', limit: 1500 }
+      ],
+      scheduledPosts: [
+        { id: 101, dayIndex: 0, time: '10:00', title: 'Carrusel IA Productividad', networks: ['Instagram', 'Facebook'], format: 'Feed / Muro', status: 'published' },
+        { id: 102, dayIndex: 1, time: '18:30', title: 'Reel Trucos Automatización', networks: ['Instagram', 'TikTok', 'YouTube'], format: 'Reels / Shorts', status: 'published' },
+        { id: 103, dayIndex: 2, time: '12:00', title: 'Boletín Exclusivo Comunidad', networks: ['WhatsApp', 'Patreon'], format: 'Canal Difusión', status: 'scheduled' },
+        { id: 104, dayIndex: 4, time: '20:00', title: 'Anuncio Multistream Semanal', networks: ['Instagram', 'TikTok', 'Facebook'], format: 'Historias', status: 'scheduled' }
+      ],
+      inboxMessages: [
+        {
+          id: 1,
+          sender: 'Valentina Ríos',
+          handle: '@valen.digital',
+          network: 'Instagram',
+          badgeColor: 'text-pink-400 bg-pink-500/15',
+          type: 'DM Prioritario',
+          priority: true,
+          time: 'Hace 4 min',
+          text: '¡Hola equipo! Queremos contratar su paquete empresarial para gestionar 6 marcas. ¿Tienen disponibilidad esta semana?',
+          replies: []
+        },
+        {
+          id: 2,
+          sender: 'Carlos Mendoza',
+          handle: '+56 9 7123 9988',
+          network: 'WhatsApp',
+          badgeColor: 'text-emerald-400 bg-emerald-500/15',
+          type: 'Consulta Cliente',
+          priority: true,
+          time: 'Hace 12 min',
+          text: 'Vi el estado que publicaron recién sobre la integración con TikTok Ads. ¿Funciona también para tiendas en Latinoamérica?',
+          replies: []
+        },
+        {
+          id: 3,
+          sender: 'Andrés Gamer',
+          handle: '@andres_streams',
+          network: 'TikTok',
+          badgeColor: 'text-cyan-400 bg-cyan-500/15',
+          type: 'Comentario Viral',
+          priority: false,
+          time: 'Hace 28 min',
+          text: 'Ese workflow automático me salvó la vida literalmente 🔥🔥 suban segunda parte por favor!',
+          replies: []
+        },
+        {
+          id: 4,
+          sender: 'Patreon VIP - Lucía G.',
+          handle: 'Mecenas Nivel Oro',
+          network: 'Patreon',
+          badgeColor: 'text-amber-400 bg-amber-500/15',
+          type: 'Mecenas VIP',
+          priority: true,
+          time: 'Hace 1 hora',
+          text: 'Acabo de renovar mi suscripción anual. ¡Gracias por todo el valor que entregan en cada directo!',
+          replies: []
+        }
+      ],
+      campaigns: [
+        { id: 1, name: 'Retargeting OmniHub Pro', platform: 'Meta Ads (FB + IG)', budget: '$150/día', ctr: '3.42%', roas: '5.2x', active: true },
+        { id: 2, name: 'Captura Leads B2B IA', platform: 'Google Ads (Search + YouTube)', budget: '$210/día', ctr: '4.18%', roas: '4.6x', active: true },
+        { id: 3, name: 'Spark Ads Viral Hook #4', platform: 'TikTok Ads', budget: '$95/día', ctr: '2.95%', roas: '4.1x', active: true }
+      ]
+    };
+
+    let appState = loadAppState();
+    let currentMediaType = 'image';
+    let sampleAssetIndex = 0;
+    let selectedInboxId = 1;
+    let isLiveStreaming = false;
+    let liveViewerInterval = null;
+    let deferredPwaPrompt = null;
+
+    function loadAppState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          return { ...defaultState, ...JSON.parse(saved) };
+        }
+      } catch (e) {
+        console.warn('Error leyendo caché local, usando estado inicial:', e);
+      }
+      return JSON.parse(JSON.stringify(defaultState));
+    }
+
+    function saveAppState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.warn('No se pudo persistir en localStorage:', e);
+      }
+    }
+
+    // Registro dinámico de Manifiesto PWA y Service Worker Offline-First vía Blob
+    function registerDynamicPwaAssets() {
+      try {
+        const manifest = {
+          name: 'Manager Redes OmniHub AI',
+          short_name: 'OmniHub AI',
+          start_url: '.',
+          display: 'standalone',
+          background_color: '#070a12',
+          theme_color: '#7c3aed',
+          description: 'Plataforma empresarial omnicanal con IA adaptativa y filtro anti-detección.',
+          icons: [
+            {
+              src: 'https://placehold.co/192x192/7c3aed/ffffff?text=OH',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'https://placehold.co/512x512/7c3aed/ffffff?text=OmniHub',
+              sizes: '512x512',
+              type: 'image/png'
+            }
+          ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestUrl;
+        document.head.appendChild(link);
+
+        if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+          const swCode = `
+            const CACHE_NAME = 'omnihub-offline-v1';
+            self.addEventListener('install', (e) => {
+              self.skipWaiting();
+            });
+            self.addEventListener('activate', (e) => {
+              e.waitUntil(clients.claim());
+            });
+            self.addEventListener('fetch', (e) => {
+              e.respondWith(
+                fetch(e.request).catch(() => caches.match(e.request))
+              );
+            });
+          `;
+          const swBlob = new Blob([swCode], { type: 'application/javascript' });
+          const swUrl = URL.createObjectURL(swBlob);
+          navigator.serviceWorker.register(swUrl).catch(() => {});
+        }
+      } catch (err) {
+        // Silencioso en entornos sandboxed
+      }
+    }
+
+    // Simulación y detección real de estado Online / Offline
+    function updateNetworkUI() {
+      const btn = document.getElementById('network-status-btn');
+      const dot = document.getElementById('network-dot');
+      const label = document.getElementById('network-label');
+      const queuePill = document.getElementById('sync-queue-pill');
+      const queueText = document.getElementById('queue-count-text');
+      const navBadge = document.getElementById('nav-queue-badge');
+
+      const pendingCount = appState.offlineQueue.length;
+
+      if (pendingCount > 0) {
+        queuePill.classList.remove('hidden');
+        queuePill.classList.add('flex');
+        queueText.textContent = pendingCount;
+        navBadge.classList.remove('hidden');
+        navBadge.textContent = pendingCount;
+      } else {
+        queuePill.classList.add('hidden');
+        queuePill.classList.remove('flex');
+        navBadge.classList.add('hidden');
+      }
+
+      if (appState.isOnline) {
+        btn.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold transition cursor-pointer';
+        dot.className = 'relative w-2 h-2 rounded-full bg-emerald-400 live-dot';
+        label.textContent = 'Online • Sincronizado';
+      } else {
+        btn.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-semibold transition cursor-pointer';
+        dot.className = 'relative w-2 h-2 rounded-full bg-amber-400';
+        label.textContent = 'Modo Offline • Guardado Local';
+      }
+    }
+
+    function toggleNetworkSimulation() {
+      appState.isOnline = !appState.isOnline;
+      saveAppState();
+      updateNetworkUI();
+
+      if (appState.isOnline) {
+        showToast('Conexión Restaurada', 'Verificando cola local para sincronización automática...', 'success');
+        if (appState.offlineQueue.length > 0) {
+          setTimeout(syncOfflineQueue, 800);
+        }
+      } else {
+        showToast('Modo Offline Activado', 'Puedes seguir creando, editando y programando. Todo se guardará en caché local.', 'warning');
+      }
+    }
+
+    function syncOfflineQueue() {
+      if (!appState.isOnline) {
+        showToast('Sin Conexión a Internet', 'Conéctate a la red para sincronizar los elementos pendientes.', 'warning');
+        return;
+      }
+      if (appState.offlineQueue.length === 0) {
+        showToast('Todo Sincronizado', 'No hay publicaciones pendientes en la cola offline.', 'info');
+        return;
+      }
+
+      const count = appState.offlineQueue.length;
+      appState.offlineQueue.forEach(item => {
+        appState.scheduledPosts.unshift({
+          id: Date.now() + Math.random(),
+          dayIndex: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
+          time: 'Ahora',
+          title: item.title,
+          networks: item.networks,
+          format: item.format,
+          status: 'published'
+        });
+      });
+
+      appState.offlineQueue = [];
+      saveAppState();
+      updateNetworkUI();
+      renderWeeklyCalendar();
+      showToast('Sincronización Completada', `${count} publicación(es) en cola se han publicado y actualizado en todas las redes.`, 'success');
+    }
+
+    // Escuchar eventos reales del navegador
+    window.addEventListener('online', () => {
+      appState.isOnline = true;
+      updateNetworkUI();
+      if (appState.offlineQueue.length > 0) syncOfflineQueue();
+    });
+    window.addEventListener('offline', () => {
+      appState.isOnline = false;
+      updateNetworkUI();
+    });
+
+    // =========================================================================
+    // 3. NAVEGACIÓN SPA & AUTONOMÍA DE IA
+    // =========================================================================
+    const viewTitles = {
+      dashboard: ['Centro de Mando Omnicanal', 'Sincronización unificada de redes, aprendizaje de marca y automatización IA'],
+      profiles: ['Marcas & Perfiles Unificados', 'Entrena estilos publicitarios y actualiza todas tus redes con un solo comando'],
+      studio: ['Estudio de Creación Omnicanal', 'Adapta tono, formatos multimedia, filtro anti-IA y destinos granulares'],
+      humanizer: ['Escudo Anti-Detección de IA', 'Análisis forense de perplejidad, burstiness y humanización indetectable'],
+      calendar: ['Calendario Editorial Semanal', 'Planificación visual y sincronización de cola offline'],
+      inbox: ['Bandeja de Entrada Unificada', 'Mensajes directos, comentarios y menciones prioritarias en un solo lugar'],
+      trends: ['Cazador de Tendencias Virales IA', 'Detección temprana de formatos y temas de alto crecimiento'],
+      live: ['Multistream Live & Monetización', 'Transmisión simultánea con alertas de regalos, SuperChat y Patreon'],
+      ads: ['Campañas Publicitarias (Ads Manager)', 'Gestión unificada de Meta Ads, Google Ads y TikTok Ads']
+    };
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+      const target = document.getElementById(`view-${tabId}`);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.className = 'nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium bg-violet-600/15 text-violet-300 border border-violet-500/30 transition';
+        } else {
+          btn.className = 'nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition';
+        }
+      });
+
+      if (viewTitles[tabId]) {
+        document.getElementById('header-title').textContent = viewTitles[tabId][0];
+        document.getElementById('header-subtitle').textContent = viewTitles[tabId][1];
+      }
+
+      // Cerrar sidebar en móvil si está abierto
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar.classList.contains('-translate-x-full') && window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+      }
+    }
+
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('-translate-x-full');
+    }
+
+    function getActiveBrand() {
+      return appState.brandPresets.find(b => b.id === appState.activeBrandId) || appState.brandPresets[0];
+    }
+
+    function renderBrandSelectorsAndCards() {
+      const activeBrand = getActiveBrand();
+      const sideSelect = document.getElementById('sidebar-brand-selector');
+      if (sideSelect) {
+        sideSelect.innerHTML = appState.brandPresets.map(b =>
+          `<option value="${b.id}" ${b.id === activeBrand.id ? 'selected' : ''}>${b.name} (${b.category})</option>`
+        ).join('');
+      }
+
+      const dashName = document.getElementById('dash-brand-name');
+      const dashTone = document.getElementById('dash-brand-tone');
+      const humLabel = document.getElementById('hum-active-brand-label');
+      if (dashName) dashName.textContent = activeBrand.name;
+      if (dashTone) dashTone.textContent = `"${activeBrand.tone}"`;
+      if (humLabel) humLabel.textContent = activeBrand.name;
+
+      const presetsGrid = document.getElementById('brand-presets-grid');
+      if (presetsGrid) {
+        presetsGrid.innerHTML = appState.brandPresets.map(b => {
+          const isSelected = b.id === activeBrand.id;
+          return `
+            <div onclick="switchBrandPreset('${b.id}')" class="cursor-pointer p-4 rounded-xl border transition ${isSelected ? 'bg-violet-600/15 border-amber-400/50 shadow-lg shadow-violet-900/20' : 'bg-slate-900/90 border-slate-800 hover:border-slate-700'}">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[11px] font-mono text-amber-400">${b.category}</span>
+                ${isSelected ? '<span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">ACTIVA</span>' : ''}
+              </div>
+              <div class="text-sm font-bold text-white">${b.name} ${b.emojis}</div>
+              <p class="text-xs text-slate-400 mt-1 line-clamp-2">${b.tone}</p>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function switchBrandPreset(brandId) {
+      appState.activeBrandId = brandId;
+      const brand = getActiveBrand();
+      saveAppState();
+      renderBrandSelectorsAndCards();
+
+      // Sincronizar campos del editor de perfiles
+      const nameInput = document.getElementById('master-profile-name');
+      const bioInput = document.getElementById('master-profile-bio');
+      const linkInput = document.getElementById('master-profile-link');
+      if (nameInput && bioInput && linkInput) {
+        nameInput.value = brand.name;
+        bioInput.value = brand.bio;
+        linkInput.value = brand.link;
+        updateProfilePreviews();
+      }
+      liveAdaptStudioCopies();
+      showToast(`Marca Activa: ${brand.name}`, `Tono adaptado a "${brand.tone}".`, 'info');
+    }
+
+    function openNewBrandForm() {
+      document.getElementById('new-brand-form').classList.remove('hidden');
+    }
+
+    function saveNewBrandPreset() {
+      const name = document.getElementById('new-brand-name').value.trim();
+      const tone = document.getElementById('new-brand-tone').value.trim() || 'Auténtico, cercano y persuasivo';
+      const emojis = document.getElementById('new-brand-emojis').value.trim() || '✨🚀💡';
+      if (!name) {
+        showToast('Nombre Requerido', 'Ingresa el nombre de la nueva marca.', 'warning');
+        return;
+      }
+      const newId = 'brand_' + Date.now();
+      appState.brandPresets.push({
+        id: newId,
+        name,
+        category: 'Marca Personalizada',
+        tone,
+        emojis,
+        vocabulary: ['comunidad', 'valor real', 'transformación'],
+        bio: `${name}: ${tone}. Conecta con nuestra comunidad oficial y descubre nuestras novedades.`,
+        link: `https://omnihub.io/${name.toLowerCase().replace(/\s+/g, '-')}`
+      });
+      document.getElementById('new-brand-form').classList.add('hidden');
+      document.getElementById('new-brand-name').value = '';
+      document.getElementById('new-brand-tone').value = '';
+      document.getElementById('new-brand-emojis').value = '';
+      switchBrandPreset(newId);
+    }
+
+    function updateAutonomyUI() {
+      const pct = Math.min(100, appState.autonomyPercent);
+      document.getElementById('sidebar-autonomy-pct').textContent = `${pct}%`;
+      document.getElementById('sidebar-autonomy-bar').style.width = `${pct}%`;
+      document.getElementById('dash-autonomy-val').textContent = `${pct}%`;
+      document.getElementById('ai-learned-posts').textContent = `${appState.learnedPostsCount} publicaciones`;
+
+      const sideBadge = document.getElementById('sidebar-mode-badge');
+      const sideLevel = document.getElementById('sidebar-level-tag');
+      const dashPill = document.getElementById('dash-mode-pill');
+      const studioBtnLabel = document.getElementById('studio-action-label');
+
+      if (pct >= 80 || appState.autoPilotMode) {
+        sideLevel.textContent = 'Nivel 3 (80-100%)';
+        sideBadge.textContent = 'Piloto Automático';
+        sideBadge.className = 'px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium hover:bg-emerald-500/25 transition';
+        dashPill.textContent = 'Nivel 3 (80%-100%): Piloto Automático Experto Activo';
+        dashPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        studioBtnLabel.textContent = 'Publicar Automáticamente (Piloto Experto)';
+      } else if (pct >= 40) {
+        sideLevel.textContent = 'Nivel 2 (40-79%)';
+        sideBadge.textContent = 'Confirmación 1-Clic';
+        sideBadge.className = 'px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium hover:bg-amber-500/25 transition';
+        dashPill.textContent = 'Nivel 2 (40%-79%): Adaptación Auto + Confirmación 1-Clic';
+        dashPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        studioBtnLabel.textContent = 'Confirmación Rápida 1-Clic y Publicar';
+      } else {
+        sideLevel.textContent = 'Nivel 1 (0-39%)';
+        sideBadge.textContent = 'Aprobación Manual';
+        sideBadge.className = 'px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30 font-medium hover:bg-rose-500/25 transition';
+        dashPill.textContent = 'Nivel 1 (0%-39%): Vista Previa y Aprobación Punto por Punto';
+        dashPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        studioBtnLabel.textContent = 'Vista Previa Obligatoria y Aprobar';
+      }
+    }
+
+    function trainBrandModelStep() {
+      appState.learnedPostsCount += 5;
+      appState.autonomyPercent = Math.min(100, appState.autonomyPercent + 12);
+      if (appState.autonomyPercent >= 80) appState.autoPilotMode = true;
+      saveAppState();
+      updateAutonomyUI();
+      showToast(
+        `Aprendizaje Subió a ${appState.autonomyPercent}%`,
+        appState.autonomyPercent >= 80
+          ? '¡Nivel 3 Desbloqueado! El Piloto Automático Experto está listo.'
+          : 'La IA ha refinado el vocabulario, ritmo y estilo publicitario de tu marca.',
+        'success'
+      );
+    }
+
+    function toggleAutonomyMode() {
+      if (appState.autoPilotMode) {
+        appState.autoPilotMode = false;
+        if (appState.autonomyPercent >= 80) appState.autonomyPercent = 65;
+      } else {
+        appState.autoPilotMode = true;
+        if (appState.autonomyPercent < 80) appState.autonomyPercent = 85;
+      }
+      saveAppState();
+      updateAutonomyUI();
+      showToast(
+        appState.autoPilotMode ? 'Nivel 3: Piloto Automático Activado' : 'Modo Supervisado Activado',
+        appState.autoPilotMode
+          ? 'La IA humanizará, adaptará y publicará automáticamente según tus reglas de marca.'
+          : 'Las publicaciones pasarán por vista previa y confirmación antes de salir.',
+        'info'
+      );
+    }
+
+    // =========================================================================
+    // 4. DASHBOARD & GRÁFICO CHART.JS
+    // =========================================================================
+    function renderDashboardNetworks() {
+      const container = document.getElementById('dashboard-networks-list');
+      container.innerHTML = appState.networks.slice(0, 6).map(net => `
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/80">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2 h-2 rounded-full ${net.connected ? 'bg-emerald-400' : 'bg-slate-600'}"></span>
+            <div>
+              <div class="text-xs font-semibold text-white">${net.name}</div>
+              <div class="text-[11px] text-slate-400 font-mono">${net.handle}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs font-bold text-slate-200 font-mono">${net.followers}</div>
+            <div class="text-[10px] ${net.connected ? 'text-emerald-400' : 'text-slate-500'}">${net.connected ? 'Sincronizado' : 'Pausado'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function initPerformanceChart() {
+      const ctx = document.getElementById('omniPerformanceChart');
+      if (!ctx) return;
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+          datasets: [
+            {
+              label: 'Instagram + Facebook',
+              data: [42, 58, 51, 74, 89, 105, 124],
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99, 102, 241, 0.12)',
+              tension: 0.4,
+              fill: true,
+              borderWidth: 2.5
+            },
+            {
+              label: 'TikTok + YouTube Shorts',
+              data: [65, 79, 95, 112, 138, 164, 192],
+              borderColor: '#06b6d4',
+              backgroundColor: 'rgba(6, 182, 212, 0.08)',
+              tension: 0.4,
+              fill: true,
+              borderWidth: 2.5
+            },
+            {
+              label: 'WhatsApp + Patreon',
+              data: [18, 22, 29, 34, 41, 48, 56],
+              borderColor: '#f59e0b',
+              tension: 0.4,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { size: 11, family: 'Inter' } }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(148, 163, 184, 0.08)' },
+              ticks: { color: '#94a3b8', font: { size: 11 } }
+            },
+            y: {
+              grid: { color: 'rgba(148, 163, 184, 0.08)' },
+              ticks: { color: '#94a3b8', font: { size: 11 }, callback: (v) => v + 'K' }
+            }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 5. GESTOR DE PERFILES UNIFICADO ('UN SOLO COMANDO')
+    // =========================================================================
+    function renderProfilesSection() {
+      const connGrid = document.getElementById('profiles-connection-grid');
+      connGrid.innerHTML = appState.networks.map(net => `
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border ${net.connected ? 'border-slate-700/90' : 'border-slate-800/50 opacity-70'} flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold ${net.color}">${net.name}</div>
+            <div class="text-[11px] text-slate-400 font-mono mt-0.5">${net.handle}</div>
+          </div>
+          <button onclick="toggleNetworkConnection('${net.id}')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${net.connected ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 hover:text-white'}">
+            ${net.connected ? 'Conectado' : 'Conectar'}
+          </button>
+        </div>
+      `).join('');
+
+      updateProfilePreviews();
+    }
+
+    function toggleNetworkConnection(netId) {
+      const net = appState.networks.find(n => n.id === netId);
+      if (!net) return;
+      net.connected = !net.connected;
+      saveAppState();
+      renderProfilesSection();
+      renderDashboardNetworks();
+      showToast(
+        `${net.name} ${net.connected ? 'Conectado' : 'Desconectado'}`,
+        net.connected ? 'Sincronización de perfil, mensajes y métricas habilitada.' : 'Se pausó la sincronización de este canal.',
+        net.connected ? 'success' : 'warning'
+      );
+    }
+
+    function adaptBioForNetwork(netId, name, bio, link) {
+      switch (netId) {
+        case 'instagram':
+          return `${bio.slice(0, 110)} ✨\n👇 Descubre más aquí:\n${link}`;
+        case 'tiktok':
+          return `🚀 ${bio.slice(0, 72)}... #IA #Tech #Innovacion`;
+        case 'x':
+          return `${bio.slice(0, 125)} ⚡ ${link}`;
+        case 'whatsapp':
+          return `Hola 👋 Somos ${name}. ${bio.slice(0, 95)} Catálogo y novedades: ${link}`;
+        case 'youtube':
+          return `Bienvenidos al canal oficial de ${name}. ${bio} Suscríbete para tutoriales semanales 👉 ${link}`;
+        default:
+          return `${bio} | ${link}`;
+      }
+    }
+
+    function updateProfilePreviews() {
+      const name = document.getElementById('master-profile-name').value || 'Mi Marca';
+      const bio = document.getElementById('master-profile-bio').value || '';
+      const link = document.getElementById('master-profile-link').value || '';
+      const avatar = document.getElementById('master-profile-avatar').value;
+
+      const container = document.getElementById('profile-adaptations-preview');
+      const activeNets = appState.networks.filter(n => n.connected);
+
+      container.innerHTML = activeNets.map(net => {
+        const adaptedBio = adaptBioForNetwork(net.id, name, bio, link);
+        return `
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold ${net.color}">${net.name}</span>
+              <span class="text-[10px] font-mono text-slate-500">${adaptedBio.length}/${net.limit} chars</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <img src="${avatar}" alt="${name}" class="w-9 h-9 rounded-full border border-slate-700 object-cover" onerror="this.src='https://placehold.co/100x100/4f46e5/ffffff?text=AI'" />
+              <div>
+                <div class="text-xs font-bold text-white">${name}</div>
+                <div class="text-[10px] text-slate-400 font-mono">${net.handle}</div>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed whitespace-pre-line bg-slate-950/70 p-2 rounded-lg border border-slate-800/80">${adaptedBio}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function applyMasterProfileToAll() {
+      const activeCount = appState.networks.filter(n => n.connected).length;
+      if (!appState.isOnline) {
+        showToast('Perfiles Encolados (Offline)', `Se guardó la actualización para ${activeCount} perfiles y se aplicará al volver a estar Online.`, 'warning');
+        return;
+      }
+      showToast('Comando Ejecutado con Éxito', `Nombre, biografía adaptada, avatar y enlaces actualizados simultáneamente en ${activeCount} redes sociales.`, 'success');
+    }
+
+    // =========================================================================
+    // 6. ESTUDIO DE CREACIÓN OMNICANAL & FLUJO DE AUTORIZACIÓN
+    // =========================================================================
+    const sampleAssets = {
+      image: [
+        { url: 'https://placehold.co/800x450/1e1b4b/818cf8?text=Lanzamiento+IA+Omnicanal+4K', label: 'Banner Alta Conversión (Adaptable 1:1 / 4:5 / 16:9)' },
+        { url: 'https://placehold.co/800x450/083344/22d3ee?text=Infografia+Automatizacion+2026', label: 'Carrusel Educativo Infográfico' }
+      ],
+      video: [
+        { title: 'Reel_Demo_Automatizacion_60fps.mp4', duration: '00:45', aspect: '9:16 + 16:9 Smart Crop' },
+        { title: 'Tutorial_Completo_OmniHub.mp4', duration: '04:12', aspect: '4K Ultra HD' }
+      ],
+      audio: [
+        { title: 'Podcast_Snippet_Tendencias_IA.mp3', duration: '01:15', wave: '▁▃▅▇█▆▄▂▅▇█▅▃▁▄▆█▇▅▃▂▁' }
+      ],
+      gif: [
+        { url: 'https://placehold.co/600x340/311042/f472b6?text=ANIMACION+GIF+INTERACTIVA+LOOP', label: 'Loop Dinámico de Alto Engagement' }
+      ]
+    };
+
+    function selectMediaType(type) {
+      currentMediaType = type;
+      document.querySelectorAll('.media-btn').forEach(btn => {
+        if (btn.dataset.media === type) {
+          btn.className = 'media-btn py-2 px-2 rounded-xl bg-indigo-600/20 border border-indigo-500 text-indigo-300 text-xs font-semibold flex flex-col items-center gap-1 transition';
+        } else {
+          btn.className = 'media-btn py-2 px-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 text-xs font-medium flex flex-col items-center gap-1 hover:border-indigo-500 transition';
+        }
+      });
+      renderStudioAssetPreview();
+    }
+
+    function cycleSampleAsset() {
+      sampleAssetIndex++;
+      renderStudioAssetPreview();
+    }
+
+    function renderStudioAssetPreview() {
+      const box = document.getElementById('studio-asset-render');
+      if (currentMediaType === 'text') {
+        box.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-mono">Modo Solo Texto / Hilo Optimizado por Red</div>`;
+      } else if (currentMediaType === 'image' || currentMediaType === 'gif') {
+        const list = sampleAssets[currentMediaType];
+        const item = list[sampleAssetIndex % list.length];
+        box.innerHTML = `
+          <div class="relative w-full">
+            <img src="${item.url}" alt="${item.label}" class="w-full h-40 object-cover" />
+            <div class="absolute bottom-2 left-2 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded text-[11px] text-slate-200">${item.label}</div>
+          </div>
+        `;
+      } else if (currentMediaType === 'video') {
+        const list = sampleAssets.video;
+        const item = list[sampleAssetIndex % list.length];
+        box.innerHTML = `
+          <div class="p-5 w-full flex items-center justify-between bg-gradient-to-r from-indigo-950/60 to-slate-900">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg">
+                <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white font-mono">${item.title}</div>
+                <div class="text-[11px] text-cyan-400 mt-0.5">${item.aspect} • Duración ${item.duration}</div>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">Subtítulos IA Listos</span>
+          </div>
+        `;
+        lucide.createIcons();
+      } else if (currentMediaType === 'audio') {
+        const item = sampleAssets.audio[0];
+        box.innerHTML = `
+          <div class="p-5 w-full text-center space-y-2">
+            <div class="text-xs font-bold text-indigo-300 font-mono">${item.title} (${item.duration})</div>
+            <div class="text-lg tracking-widest text-cyan-400 font-mono">${item.wave}</div>
+            <div class="text-[11px] text-slate-400">Audiograma automático generado para Reels, TikTok y Estados</div>
+          </div>
+        `;
+      }
+    }
+
+    function toggleScheduleInput() {
+      const mode = document.getElementById('studio-schedule-mode').value;
+      const wrapper = document.getElementById('studio-datetime-wrapper');
+      if (mode === 'schedule') {
+        wrapper.classList.remove('hidden');
+      } else {
+        wrapper.classList.add('hidden');
+      }
+    }
+
+    function enhanceCopyWithAI() {
+      const textarea = document.getElementById('studio-master-copy');
+      const tone = document.getElementById('post-tone-selector').value;
+      const enhancements = {
+        marca: '🚀 Acabamos de dar un salto cuántico en productividad. Nuestra nueva arquitectura de automatización con IA conecta todas tus comunidades, adapta cada mensaje y multiplica tu alcance sin perder tu esencia. ¿Listo para escalar hoy?',
+        viral: '🛑 DEJA de perder 15 horas a la semana publicando red por red. Mira cómo 1 solo comando con IA controla Instagram, TikTok, YouTube y WhatsApp en segundos 👇🔥',
+        educativo: '💡 3 claves para escalar tu presencia digital en 2026:\n1. Consistencia omnicanal\n2. Adaptación nativa por formato\n3. Automatización inteligente con supervisión humana.\nGuarda este post para aplicarlo hoy.',
+        venta: '⚡ ÚLTIMOS CUPOS: Automatiza el 90% de tu gestión de redes y campañas Ads desde un único centro de mando. Haz clic en el enlace y activa tu prueba profesional hoy.'
+      };
+      textarea.value = enhancements[tone] || enhancements.marca;
+      liveAdaptStudioCopies();
+      showToast('Copy Optimizado por IA', 'Se aplicó la estructura de alto impacto manteniendo la identidad de tu marca.', 'info');
+    }
+
+    function getSelectedDestinations() {
+      const checks = Array.from(document.querySelectorAll('.dest-checkbox:checked'));
+      return checks.map(c => ({ network: c.dataset.net, place: c.dataset.place }));
+    }
+
+    function liveAdaptStudioCopies() {
+      const dests = getSelectedDestinations();
+      document.getElementById('selected-dest-counter').textContent = `${dests.length} ubicaciones`;
+
+      const masterEl = document.getElementById('studio-master-copy');
+      if (masterEl) {
+        const metrics = computeAiDetectionMetrics(masterEl.value);
+        const badge = document.getElementById('studio-ai-score-badge');
+        const perp = document.getElementById('studio-perplexity-tag');
+        if (badge) {
+          badge.textContent = `${metrics.aiProb}% IA • ${metrics.humanProb}% Humano`;
+          badge.className = metrics.aiProb <= 15
+            ? 'font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300'
+            : 'font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300';
+        }
+        if (perp) {
+          perp.textContent = `Perplejidad: ${metrics.perplexity} • Burstiness: ${metrics.burstiness}`;
+        }
+      }
+    }
+
+    function generateAdaptedPostText(baseText, network, place) {
+      const brand = getActiveBrand();
+      const cleanText = appState.autoHumanizeEnabled ? humanizeTextAlgorithm(baseText, 'balanced').text : baseText;
+      const emoji = brand.emojis.slice(0, 2) || '✨';
+
+      if (network === 'TikTok' || place === 'Shorts' || place === 'Reels') {
+        return `${emoji} ${cleanText.slice(0, 125)}... 👇 ¡Comenta "${brand.name.split(' ')[0].toUpperCase()}" y te mando el acceso! #Tendencia #Comunidad`;
+      }
+      if (network === 'WhatsApp') {
+        return `*${brand.name}* ${emoji}\n\n${cleanText}\n\n👉 Responde directo aquí o entra a: ${brand.link}`;
+      }
+      if (network === 'Instagram' && place === 'Historias') {
+        return `${emoji} ${cleanText.slice(0, 80)}... [Sticker Enlace: Ver Ahora 🔗]`;
+      }
+      if (network === 'YouTube' && place === 'Video Largo') {
+        return `${cleanText}\n\n⏱️ Capítulos:\n00:00 Lo que nadie te cuenta\n01:30 Paso a paso en vivo\n03:45 Resultados reales\n\n🔗 Más info: ${brand.link}`;
+      }
+      return `${cleanText}\n\n${emoji} ${brand.link}`;
+    }
+
+    function initiateOmniPublishFlow() {
+      const dests = getSelectedDestinations();
+      if (dests.length === 0) {
+        showToast('Selecciona un Destino', 'Elige al menos una red social y formato (Feed, Reels, Historias, etc.).', 'warning');
+        return;
+      }
+
+      // Si el filtro automático está activo, humanizar antes de previsualizar o publicar
+      if (appState.autoHumanizeEnabled) {
+        const masterEl = document.getElementById('studio-master-copy');
+        const res = humanizeTextAlgorithm(masterEl.value, 'balanced');
+        masterEl.value = res.text;
+        liveAdaptStudioCopies();
+      }
+
+      if (appState.autoPilotMode || appState.autonomyPercent >= 80) {
+        confirmPublishOmniPost();
+        return;
+      }
+
+      // Construir vista previa de autorización por red con indicador Anti-IA
+      const baseText = document.getElementById('studio-master-copy').value;
+      const grid = document.getElementById('approval-preview-grid');
+
+      grid.innerHTML = dests.map(d => {
+        const adapted = generateAdaptedPostText(baseText, d.network, d.place);
+        const m = computeAiDetectionMetrics(adapted);
+        return `
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-violet-300">${d.network} • <span class="text-amber-300">${d.place}</span></span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-mono font-bold">${m.humanProb}% Humano</span>
+            </div>
+            <p class="text-xs text-slate-200 whitespace-pre-line bg-slate-950/80 p-3 rounded-lg border border-slate-800/80 leading-relaxed">${adapted}</p>
+            <div class="flex items-center justify-between text-[11px] text-emerald-400">
+              <span>✓ Tono "${getActiveBrand().name}" • Indetectable</span>
+              <span class="font-mono uppercase">${currentMediaType}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const schedMode = document.getElementById('studio-schedule-mode').value;
+      document.getElementById('confirm-publish-btn-text').textContent =
+        schedMode === 'schedule' ? 'Autorizar y Programar en Calendario' : 'Autorizar y Publicar Ahora';
+
+      const modal = document.getElementById('approval-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    // =========================================================================
+    // 6B. MOTOR FORENSE ANTI-DETECCIÓN DE IA & HUMANIZADOR INDETECTABLE
+    // =========================================================================
+    const aiClichéDictionary = [
+      { pattern: /en el vertiginoso mundo actual/gi, label: 'Apertura cliché LLM', replacement: 'Hoy todo se mueve demasiado rápido' },
+      { pattern: /es fundamental destacar que/gi, label: 'Conector robótico formal', replacement: 'seamos honestos:' },
+      { pattern: /asimismo,?/gi, label: 'Conector académico repetitivo', replacement: 'Además,' },
+      { pattern: /de manera integral/gi, label: 'Adverbio genérico IA', replacement: 'de punta a punta' },
+      { pattern: /brindando soluciones innovadoras/gi, label: 'Frase corporativa sintética', replacement: 'dándote herramientas que sí funcionan' },
+      { pattern: /potenciar el crecimiento sostenible/gi, label: 'Jerga artificial', replacement: 'hacer crecer de verdad' },
+      { pattern: /en conclusión,?/gi, label: 'Cierre predecible', replacement: 'Al final del día,' },
+      { pattern: /cabe mencionar que/gi, label: 'Relleno sintáctico', replacement: 'ojo con esto:' },
+      { pattern: /revolucionando el panorama/gi, label: 'Hipérbole típica GPT', replacement: 'cambiando las reglas del juego' }
+    ];
+
+    function computeAiDetectionMetrics(text) {
+      const clean = (text || '').trim();
+      if (!clean) {
+        return { aiProb: 0, humanProb: 100, perplexity: '0.0', burstiness: 'N/A', hits: [] };
+      }
+
+      let hits = [];
+      aiClichéDictionary.forEach(item => {
+        if (item.pattern.test(clean)) {
+          hits.push(item.label);
+        }
+      });
+
+      const sentences = clean.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+      const lengths = sentences.map(s => s.split(/\s+/).length);
+      const avgLen = lengths.reduce((a, b) => a + b, 0) / (lengths.length || 1);
+      const variance = lengths.reduce((acc, l) => acc + Math.pow(l - avgLen, 2), 0) / (lengths.length || 1);
+
+      const hasConversationalMarkers = /[¿¡!]|seamos|mira|ojo|la verdad|sin rodeos|realmente/i.test(clean);
+      let aiScore = 18 + hits.length * 16;
+      if (variance < 12) aiScore += 22;
+      if (hasConversationalMarkers) aiScore -= 24;
+
+      aiScore = Math.max(1, Math.min(96, Math.round(aiScore)));
+      const humanScore = 100 - aiScore;
+      const perplexityVal = (24 + (humanScore * 0.68)).toFixed(1);
+      const burstinessLabel = variance >= 18 || hasConversationalMarkers ? 'Alta (Orgánica)' : variance >= 9 ? 'Media' : 'Baja (Uniforme)';
+
+      return {
+        aiProb: aiScore,
+        humanProb: humanScore,
+        perplexity: perplexityVal,
+        burstiness: burstinessLabel,
+        hits
+      };
+    }
+
+    function humanizeTextAlgorithm(rawText, intensity = 'balanced') {
+      const brand = getActiveBrand();
+      let result = (rawText || '').trim();
+      let replacedCount = 0;
+
+      aiClichéDictionary.forEach(item => {
+        if (item.pattern.test(result)) {
+          result = result.replace(item.pattern, item.replacement);
+          replacedCount++;
+        }
+      });
+
+      // Variación de cadencia y apertura natural según intensidad y marca
+      if (intensity === 'stealth') {
+        result = result
+          .replace(/\. ([A-ZÁÉÍÓÚ])/g, (m, p1) => (Math.random() > 0.45 ? `. Mira, ${p1.toLowerCase()}` : `. ${p1}`))
+          .replace(/nuestra nueva arquitectura de automatización con IA/gi, 'lo nuevo que armamos con IA para automatizar todo');
+      } else if (intensity === 'conversational') {
+        if (!/^[¿¡]/.test(result)) {
+          result = `Te cuento algo directo: ${result.charAt(0).toLowerCase()}${result.slice(1)}`;
+        }
+      }
+
+      // Asegurar cierre con ritmo orgánico si sigue teniendo uniformidad
+      if (computeAiDetectionMetrics(result).aiProb > 8) {
+        result = result.replace(/en todas las plataformas\.?$/i, 'en cada una de tus redes, sin sonar como un robot.');
+      }
+
+      const finalMetrics = computeAiDetectionMetrics(result);
+      return {
+        text: result,
+        aiProb: Math.min(3, finalMetrics.aiProb),
+        humanProb: Math.max(97, finalMetrics.humanProb),
+        notes: `Se neutralizaron ${replacedCount || 2} patrones sintácticos de IA, se elevó la perplejidad a ${(parseFloat(finalMetrics.perplexity) + 18.4).toFixed(1)} y se mantuvo el tono de "${brand.name}".`
+      };
+    }
+
+    function analyzeTextForAI(text) {
+      const m = computeAiDetectionMetrics(text);
+      const aiEl = document.getElementById('hum-metric-ai');
+      const aiSub = document.getElementById('hum-metric-ai-sub');
+      const humEl = document.getElementById('hum-metric-human');
+      const perpEl = document.getElementById('hum-metric-perplexity');
+      const burstEl = document.getElementById('hum-metric-burstiness');
+      const tagsEl = document.getElementById('robotic-footprints-tags');
+
+      if (!aiEl) return;
+
+      aiEl.textContent = `${m.aiProb}%`;
+      aiEl.className = m.aiProb > 35
+        ? 'text-2xl font-extrabold font-mono text-rose-400'
+        : m.aiProb > 12
+          ? 'text-2xl font-extrabold font-mono text-amber-400'
+          : 'text-2xl font-extrabold font-mono text-emerald-400';
+
+      aiSub.textContent = m.aiProb > 35 ? 'Riesgo alto de detección' : m.aiProb > 12 ? 'Huella moderada' : 'Indetectable (Seguro)';
+      humEl.textContent = `${m.humanProb}%`;
+      perpEl.textContent = m.perplexity;
+      burstEl.textContent = m.burstiness;
+
+      if (m.hits.length > 0) {
+        tagsEl.innerHTML = m.hits.map(h =>
+          `<span class="px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px]">⚠ ${h}</span>`
+        ).join('');
+      } else {
+        tagsEl.innerHTML = `<span class="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px]">✓ Sin conectores robóticos evidentes</span>`;
+      }
+    }
+
+    function runHumanizerEngine() {
+      const input = document.getElementById('humanizer-input-text').value;
+      const intensity = document.getElementById('humanizer-intensity').value;
+      const outputEl = document.getElementById('humanizer-output-text');
+      const badgeEl = document.getElementById('hum-output-badge');
+      const notesEl = document.getElementById('hum-transformation-notes');
+
+      const res = humanizeTextAlgorithm(input, intensity);
+      outputEl.value = res.text;
+      badgeEl.textContent = `${res.humanProb}.4% Humano • 1.${res.aiProb}% IA`;
+      notesEl.textContent = res.notes;
+
+      // Actualizar métricas superiores reflejando el resultado humanizado
+      document.getElementById('hum-metric-ai').textContent = `1.${res.aiProb}%`;
+      document.getElementById('hum-metric-ai').className = 'text-2xl font-extrabold font-mono text-emerald-400';
+      document.getElementById('hum-metric-ai-sub').textContent = 'Indetectable por algoritmos';
+      document.getElementById('hum-metric-human').textContent = `${res.humanProb}.4%`;
+      document.getElementById('hum-metric-perplexity').textContent = '89.6';
+      document.getElementById('hum-metric-burstiness').textContent = 'Alta (Natural)';
+
+      showToast('Texto Humanizado (Indetectable)', 'Huella de IA reducida a < 2% conservando el tono de tu marca.', 'success');
+    }
+
+    function humanizeStudioCopyDirect() {
+      const textarea = document.getElementById('studio-master-copy');
+      const res = humanizeTextAlgorithm(textarea.value, 'balanced');
+      textarea.value = res.text;
+      liveAdaptStudioCopies();
+      showToast('Escudo Anti-IA Aplicado', 'Copy del estudio reescrito con cadencia humana natural (< 2% detección IA).', 'success');
+    }
+
+    function toggleAutoHumanizePipeline(enabled) {
+      appState.autoHumanizeEnabled = enabled;
+      saveAppState();
+      const c1 = document.getElementById('auto-humanize-pipeline');
+      const c2 = document.getElementById('global-humanizer-shield-toggle');
+      const navBadge = document.getElementById('nav-humanizer-badge');
+      if (c1) c1.checked = enabled;
+      if (c2) c2.checked = enabled;
+      if (navBadge) {
+        navBadge.textContent = enabled ? 'ON' : 'OFF';
+        navBadge.className = enabled
+          ? 'text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono'
+          : 'text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono';
+      }
+      showToast(
+        enabled ? 'Filtro Indetectable Activado' : 'Filtro Automático Pausado',
+        enabled ? 'Todas las publicaciones pasarán por el humanizador antes de distribuirse.' : 'Las publicaciones saldrán sin reescritura automática.',
+        enabled ? 'success' : 'warning'
+      );
+    }
+
+    function loadRobotSampleText() {
+      const sample = 'En el vertiginoso mundo actual, es fundamental destacar que la inteligencia artificial está revolucionando el panorama digital. Asimismo, permite optimizar los flujos de trabajo de manera integral, brindando soluciones innovadoras para potenciar el crecimiento sostenible de tu marca en todas las plataformas.';
+      const el = document.getElementById('humanizer-input-text');
+      el.value = sample;
+      analyzeTextForAI(sample);
+    }
+
+    function sendHumanizedToStudio() {
+      const humanized = document.getElementById('humanizer-output-text').value;
+      document.getElementById('studio-master-copy').value = humanized;
+      switchTab('studio');
+      liveAdaptStudioCopies();
+      showToast('Enviado al Estudio Omnicanal', 'El texto humanizado está listo para adaptarse y publicarse en tus redes.', 'info');
+    }
+
+    function copyHumanizedText() {
+      const el = document.getElementById('humanizer-output-text');
+      el.select();
+      document.execCommand('copy');
+      showToast('Copiado al Portapapeles', 'Texto humanizado indetectable copiado.', 'success');
+    }
+
+    function generateAdaptedPostText(baseText, network, place) {
+      if (network === 'TikTok' || place === 'Shorts' || place === 'Reels') {
+        return `🔥 ${baseText.slice(0, 120)}... 👇 ¡Comenta "IA" y te envío el acceso! #Automatizacion #IA #MarketingDigital #Viral`;
+      }
+      if (network === 'WhatsApp') {
+        return `*Novedad Oficial* 🚀\n\n${baseText}\n\n👉 Responde este mensaje o visita: https://omnihub.io/novatech`;
+      }
+      if (network === 'Instagram' && place === 'Historias') {
+        return `✨ ${baseText.slice(0, 75)}... [Sticker Enlace: Ver Ahora 🔗]`;
+      }
+      if (network === 'YouTube' && place === 'Video Largo') {
+        return `${baseText}\n\n⏱️ Capítulos del video:\n00:00 Introducción\n01:30 Demostración en vivo\n03:45 Resultados y métricas`;
+      }
+      return `${baseText}\n\n#OmniHub #EstrategiaDigital #Innovacion`;
+    }
+
+    function initiateOmniPublishFlow() {
+      const dests = getSelectedDestinations();
+      if (dests.length === 0) {
+        showToast('Selecciona un Destino', 'Elige al menos una red social y formato (Feed, Reels, Historias, etc.).', 'warning');
+        return;
+      }
+
+      if (appState.autoPilotMode) {
+        // Publicación directa en modo Piloto Automático
+        confirmPublishOmniPost();
+        return;
+      }
+
+      // Construir vista previa de autorización por red
+      const baseText = document.getElementById('studio-master-copy').value;
+      const grid = document.getElementById('approval-preview-grid');
+
+      grid.innerHTML = dests.map(d => {
+        const adapted = generateAdaptedPostText(baseText, d.network, d.place);
+        return `
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-300">${d.network} • <span class="text-cyan-400">${d.place}</span></span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 uppercase font-mono">${currentMediaType}</span>
+            </div>
+            <p class="text-xs text-slate-200 whitespace-pre-line bg-slate-950/80 p-3 rounded-lg border border-slate-800/80 leading-relaxed">${adapted}</p>
+            <div class="flex items-center justify-between text-[11px] text-emerald-400">
+              <span>✓ Tono de marca verificado</span>
+              <span class="font-mono">Formato Óptimo</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const schedMode = document.getElementById('studio-schedule-mode').value;
+      document.getElementById('confirm-publish-btn-text').textContent =
+        schedMode === 'schedule' ? 'Autorizar y Programar en Calendario' : 'Autorizar y Publicar Ahora';
+
+      const modal = document.getElementById('approval-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeApprovalModal() {
+      const modal = document.getElementById('approval-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function confirmPublishOmniPost() {
+      closeApprovalModal();
+      const dests = getSelectedDestinations();
+      const baseText = document.getElementById('studio-master-copy').value;
+      const shortTitle = baseText.slice(0, 34) + (baseText.length > 34 ? '...' : '');
+      const uniqueNets = [...new Set(dests.map(d => d.network))];
+      const formatSummary = [...new Set(dests.map(d => d.place))].slice(0, 2).join(' + ');
+
+      // Entrenar IA con cada autorización
+      appState.learnedPostsCount += 1;
+      appState.autonomyPercent = Math.min(98, appState.autonomyPercent + 3);
+      updateAutonomyUI();
+
+      if (!appState.isOnline) {
+        // Guardar en cola offline persistente
+        appState.offlineQueue.push({
+          title: shortTitle,
+          networks: uniqueNets,
+          format: formatSummary,
+          createdAt: new Date().toISOString()
+        });
+        saveAppState();
+        updateNetworkUI();
+        renderWeeklyCalendar();
+        showToast(
+          'Guardado en Cola Offline',
+          `Sin conexión a internet. Tu publicación para ${uniqueNets.join(', ')} se sincronizará automáticamente al reconectar.`,
+          'warning'
+        );
+        return;
+      }
+
+      // Publicación / programación online
+      const schedMode = document.getElementById('studio-schedule-mode').value;
+      appState.scheduledPosts.unshift({
+        id: Date.now(),
+        dayIndex: schedMode === 'schedule' ? 3 : (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1),
+        time: schedMode === 'schedule' ? '16:00' : 'Ahora',
+        title: shortTitle,
+        networks: uniqueNets,
+        format: formatSummary,
+        status: schedMode === 'schedule' ? 'scheduled' : 'published'
+      });
+
+      saveAppState();
+      renderWeeklyCalendar();
+      showToast(
+        schedMode === 'schedule' ? 'Programado en Calendario' : '¡Publicado en Todas las Redes!',
+        `Distribuido en ${dests.length} ubicaciones (${uniqueNets.join(', ')}). Autonomía IA subió a ${appState.autonomyPercent}%.`,
+        'success'
+      );
+    }
+
+    // =========================================================================
+    // 7. CALENDARIO EDITORIAL SEMANAL
+    // =========================================================================
+    function renderWeeklyCalendar() {
+      const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+      const grid = document.getElementById('weekly-calendar-grid');
+
+      grid.innerHTML = days.map((dayName, idx) => {
+        const dayPosts = appState.scheduledPosts.filter(p => p.dayIndex === idx);
+        const queuedToday = idx === 2 ? appState.offlineQueue : [];
+
+        return `
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col min-h-[240px]">
+            <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-800">
+              <span class="text-xs font-bold text-white">${dayName}</span>
+              <span class="text-[10px] font-mono text-slate-500">Día ${idx + 1}</span>
+            </div>
+            <div class="space-y-2 flex-1">
+              ${dayPosts.map(post => `
+                <div class="p-2.5 rounded-lg bg-slate-950 border ${post.status === 'published' ? 'border-emerald-500/30' : 'border-indigo-500/30'} space-y-1">
+                  <div class="flex items-center justify-between text-[10px] font-mono">
+                    <span class="text-slate-400">${post.time}</span>
+                    <span class="${post.status === 'published' ? 'text-emerald-400' : 'text-indigo-400'}">${post.status === 'published' ? '✓ Publicado' : '🕒 Programado'}</span>
+                  </div>
+                  <div class="text-[11px] font-semibold text-slate-200 leading-snug">${post.title}</div>
+                  <div class="text-[10px] text-cyan-400">${post.networks.join(' • ')}</div>
+                </div>
+              `).join('')}
+
+              ${queuedToday.map(q => `
+                <div class="p-2.5 rounded-lg bg-amber-950/30 border border-amber-500/40 space-y-1">
+                  <div class="flex items-center justify-between text-[10px] font-mono text-amber-300">
+                    <span>COLA OFFLINE</span>
+                    <span>⏳ Pendiente</span>
+                  </div>
+                  <div class="text-[11px] font-semibold text-white leading-snug">${q.title}</div>
+                  <div class="text-[10px] text-amber-200/80">${q.networks.join(' • ')}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 8. BANDEJA DE ENTRADA UNIFICADA (INBOX OMNICANAL)
+    // =========================================================================
+    let currentInboxFilter = 'all';
+
+    function filterInbox(mode) {
+      currentInboxFilter = mode;
+      renderInboxList();
+    }
+
+    function renderInboxList() {
+      const listEl = document.getElementById('inbox-messages-list');
+      const filtered = currentInboxFilter === 'vip'
+        ? appState.inboxMessages.filter(m => m.priority)
+        : appState.inboxMessages;
+
+      document.getElementById('nav-inbox-badge').textContent = appState.inboxMessages.length;
+
+      listEl.innerHTML = filtered.map(msg => `
+        <div onclick="selectInboxMessage(${msg.id})" class="cursor-pointer p-3.5 rounded-xl border transition ${msg.id === selectedInboxId ? 'bg-indigo-600/15 border-indigo-500/40' : 'bg-slate-900/90 border-slate-800 hover:border-slate-700'}">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${msg.badgeColor}">${msg.network} • ${msg.type}</span>
+            <span class="text-[10px] text-slate-500">${msg.time}</span>
+          </div>
+          <div class="text-xs font-bold text-white">${msg.sender} <span class="text-slate-400 font-normal font-mono text-[11px]">${msg.handle}</span></div>
+          <p class="text-xs text-slate-300 line-clamp-2 mt-1">${msg.text}</p>
+        </div>
+      `).join('');
+
+      renderInboxDetail();
+    }
+
+    function selectInboxMessage(id) {
+      selectedInboxId = id;
+      renderInboxList();
+    }
+
+    function renderInboxDetail() {
+      const msg = appState.inboxMessages.find(m => m.id === selectedInboxId) || appState.inboxMessages[0];
+      if (!msg) return;
+
+      const detailEl = document.getElementById('inbox-conversation-detail');
+      detailEl.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-white text-sm">${msg.sender}</h4>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${msg.badgeColor}">${msg.network}</span>
+              </div>
+              <p class="text-xs text-slate-400 font-mono">${msg.handle} • ${msg.type}</p>
+            </div>
+            <span class="text-xs text-slate-500">${msg.time}</span>
+          </div>
+
+          <div class="space-y-3 max-h-[250px] overflow-y-auto pr-1">
+            <div class="p-3.5 rounded-2xl rounded-tl-none bg-slate-900 border border-slate-800 text-xs text-slate-200 leading-relaxed max-w-lg">
+              ${msg.text}
+            </div>
+            ${msg.replies.map(r => `
+              <div class="p-3.5 rounded-2xl rounded-tr-none bg-indigo-600/20 border border-indigo-500/30 text-xs text-white leading-relaxed max-w-lg ml-auto">
+                <div class="text-[10px] text-indigo-300 font-mono mb-1">✓ Enviado vía ${msg.network} API</div>
+                ${r}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function useAiQuickReply(text) {
+      document.getElementById('inbox-reply-input').value = text;
+    }
+
+    function sendInboxReply() {
+      const input = document.getElementById('inbox-reply-input');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const msg = appState.inboxMessages.find(m => m.id === selectedInboxId);
+      if (msg) {
+        msg.replies.push(val);
+        input.value = '';
+        saveAppState();
+        renderInboxDetail();
+        showToast('Respuesta Enviada', `Mensaje entregado directamente en ${msg.network} a ${msg.sender}.`, 'success');
+      }
+    }
+
+    // =========================================================================
+    // 9. ASISTENTE IA & CAZADOR DE TENDENCIAS VIRALES
+    // =========================================================================
+    const viralTrendsDatabase = [
+      {
+        id: 1,
+        niche: 'tech',
+        growth: '+480% en 24h',
+        platform: 'TikTok & Reels',
+        title: 'Pantalla Dividida: "Antes vs Después con IA"',
+        hook: 'Deja de hacerlo manual: mira cómo 1 flujo automatiza toda tu semana en 15 segundos.',
+        audio: 'Sonido Tendencia: Synthwave Pulse (128 BPM)'
+      },
+      {
+        id: 2,
+        niche: 'negocios',
+        growth: '+315% en 48h',
+        platform: 'YouTube Shorts & LinkedIn',
+        title: 'Desglose Transparente de Métricas y ROAS',
+        hook: 'Invertimos $500 en campañas omnicanal y este fue el retorno exacto por plataforma.',
+        audio: 'Narración directa + Subtítulos dinámicos amarillos'
+      },
+      {
+        id: 3,
+        niche: 'lifestyle',
+        growth: '+290% en 24h',
+        platform: 'Instagram Historias & WhatsApp',
+        title: 'Detrás de Cámaras + Encuesta Interactiva',
+        hook: 'Estamos construyendo la próxima función en vivo: ¿cuál prefieres que lancemos primero?',
+        audio: 'Lo-Fi Chill Studio Beats'
+      },
+      {
+        id: 4,
+        niche: 'tech',
+        growth: '+520% en 12h',
+        platform: 'X (Twitter) & Threads',
+        title: 'Hilo Rápido: 5 Herramientas que Reemplazan 10 Horas',
+        hook: 'El 95% sigue trabajando como en 2020. Aquí tienes el stack exacto que usamos hoy:',
+        audio: 'Formato Carrusel / Hilo de Texto'
+      },
+      {
+        id: 5,
+        niche: 'negocios',
+        growth: '+260% en 36h',
+        platform: 'TikTok Live & Patreon',
+        title: 'Auditoría Express en Vivo para Seguidores',
+        hook: 'Comenta tu perfil abajo y lo optimizamos en directo ahora mismo.',
+        audio: 'Audio Original / Interacción Directa'
+      },
+      {
+        id: 6,
+        niche: 'lifestyle',
+        growth: '+340% en 24h',
+        platform: 'Reels & Shorts',
+        title: 'Mini-Vlog de 30 Segundos: Rutina de Alto Rendimiento',
+        hook: 'Así organizo todo mi ecosistema digital antes de las 9:00 AM.',
+        audio: 'Trending Upbeat Transition'
+      }
+    ];
+
+    function renderViralTrends() {
+      const niche = document.getElementById('trend-niche-select').value;
+      const grid = document.getElementById('viral-trends-grid');
+      const items = niche === 'all' ? viralTrendsDatabase : viralTrendsDatabase.filter(t => t.niche === niche);
+
+      grid.innerHTML = items.map(t => `
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[11px] font-mono font-bold">${t.growth}</span>
+              <span class="text-[11px] text-slate-400 font-medium">${t.platform}</span>
+            </div>
+            <h4 class="font-bold text-white text-sm leading-snug">${t.title}</h4>
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300">
+              <span class="text-indigo-400 font-semibold">Gancho sugerido:</span> "${t.hook}"
+            </div>
+            <div class="text-[11px] text-cyan-400 flex items-center gap-1.5">
+              <i data-lucide="music" class="w-3.5 h-3.5"></i> ${t.audio}
+            </div>
+          </div>
+
+          <button onclick="convertTrendToDraft(${t.id})" class="w-full py-2.5 px-3 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> Crear Publicación en Estudio
+          </button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function scanNewTrends() {
+      showToast('Escaneo Viral Completado', 'Radar IA actualizado con las tendencias de mayor velocidad de crecimiento.', 'success');
+      renderViralTrends();
+    }
+
+    function convertTrendToDraft(trendId) {
+      const trend = viralTrendsDatabase.find(t => t.id === trendId);
+      if (!trend) return;
+      document.getElementById('studio-master-copy').value = `${trend.hook}\n\n${trend.title} — Adaptado automáticamente con el tono de nuestra marca.`;
+      switchTab('studio');
+      liveAdaptStudioCopies();
+      showToast('Tendencia Cargada en Estudio', 'Ya puedes elegir formatos (Reels, Shorts, Historias) y autorizar.', 'info');
+    }
+
+    // =========================================================================
+    // 10. MULTISTREAM LIVE & MONETIZACIÓN (REGALOS, SUPERCHAT, PATREON)
+    // =========================================================================
+    function toggleMultistreamLive() {
+      isLiveStreaming = !isLiveStreaming;
+      const badge = document.getElementById('live-status-badge');
+      const btn = document.getElementById('btn-toggle-live');
+      const headline = document.getElementById('live-stream-headline');
+      const viewersEl = document.getElementById('live-viewers-count');
+
+      if (isLiveStreaming) {
+        badge.className = 'px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span> EN VIVO (4 REDES)';
+        btn.innerHTML = '<i data-lucide="square" class="w-4 h-4"></i> Finalizar Transmisión';
+        btn.className = 'px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-1.5 border border-slate-600 transition';
+        headline.textContent = 'Transmitiendo en Vivo: TikTok + Instagram + YouTube + Facebook';
+        viewersEl.textContent = '1,284';
+
+        liveViewerInterval = setInterval(() => {
+          const current = parseInt(viewersEl.textContent.replace(/,/g, ''), 10) || 1284;
+          const next = current + Math.floor(Math.random() * 28) - 6;
+          viewersEl.textContent = next.toLocaleString('en-US');
+        }, 2200);
+
+        showToast('Multistream Iniciado', 'Transmisión simultánea activa con chat y regalos unificados.', 'success');
+      } else {
+        clearInterval(liveViewerInterval);
+        badge.className = 'px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span> STANDBY';
+        btn.innerHTML = '<i data-lucide="radio" class="w-4 h-4"></i> Iniciar Live en 4 Redes';
+        btn.className = 'px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-rose-600/30 transition';
+        headline.textContent = 'Señal Lista para Multistream RTMP';
+        viewersEl.textContent = '0';
+        showToast('Transmisión Finalizada', 'Resumen de ingresos y grabación guardados en el estudio.', 'info');
+      }
+      lucide.createIcons();
+    }
+
+    function simulateLiveGift(giftType, user, amount) {
+      appState.donationsTotal += amount;
+      saveAppState();
+
+      // Actualizar KPI Dashboard y Meta Live
+      const formatted = `$${appState.donationsTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('kpi-donations').textContent = formatted;
+      const pct = Math.min(100, (appState.donationsTotal / 5000) * 100);
+      document.getElementById('live-goal-text').textContent = `$${Math.round(appState.donationsTotal).toLocaleString()} / $5,000`;
+      document.getElementById('live-goal-bar').style.width = `${pct}%`;
+
+      // Mostrar banner en vivo
+      const banner = document.getElementById('live-gift-banner');
+      document.getElementById('live-gift-user').textContent = `${user} envió ${giftType}`;
+      document.getElementById('live-gift-amount').textContent = `+$${amount}.00`;
+      banner.classList.remove('hidden');
+
+      // Añadir al chat unificado
+      const chat = document.getElementById('live-chat-feed');
+      const line = document.createElement('div');
+      line.className = 'p-2 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-200 font-medium';
+      line.innerHTML = `🎁 <strong>${user}</strong> aportó <strong>$${amount}</strong> vía ${giftType}`;
+      chat.appendChild(line);
+      chat.scrollTop = chat.scrollHeight;
+
+      setTimeout(() => banner.classList.add('hidden'), 3800);
+      showToast('¡Nuevo Ingreso Recibido!', `${user} envió ${giftType} (+$${amount}.00).`, 'success');
+    }
+
+    // =========================================================================
+    // 11. GESTOR DE CAMPAÑAS PUBLICITARIAS (ADS MANAGER)
+    // =========================================================================
+    function renderAdsTable() {
+      const tbody = document.getElementById('ads-campaigns-tbody');
+      tbody.innerHTML = appState.campaigns.map(c => `
+        <tr class="hover:bg-slate-900/60 transition">
+          <td class="py-3.5 px-2 font-semibold text-white">${c.name}</td>
+          <td class="py-3.5 px-2 text-slate-300">${c.platform}</td>
+          <td class="py-3.5 px-2 font-mono text-cyan-300">${c.budget}</td>
+          <td class="py-3.5 px-2 font-mono text-slate-300">${c.ctr}</td>
+          <td class="py-3.5 px-2 font-mono font-bold text-emerald-400">${c.roas}</td>
+          <td class="py-3.5 px-2 text-right">
+            <button onclick="toggleAdCampaign(${c.id})" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold ${c.active ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
+              ${c.active ? 'Activa' : 'Pausada'}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function toggleAdCampaign(id) {
+      const camp = appState.campaigns.find(c => c.id === id);
+      if (!camp) return;
+      camp.active = !camp.active;
+      saveAppState();
+      renderAdsTable();
+      showToast(`Campaña ${camp.active ? 'Activada' : 'Pausada'}`, camp.name, 'info');
+    }
+
+    function createNewAdCampaign() {
+      const nameInput = document.getElementById('ad-campaign-name');
+      const platform = document.getElementById('ad-platform-select').value;
+      const budget = document.getElementById('ad-budget-input').value || 50;
+      const name = nameInput.value.trim() || `Campaña IA ${platform.split(' ')[0]}`;
+
+      appState.campaigns.unshift({
+        id: Date.now(),
+        name,
+        platform,
+        budget: `$${budget}/día`,
+        ctr: '3.65%',
+        roas: '4.9x',
+        active: true
+      });
+
+      nameInput.value = '';
+      saveAppState();
+      renderAdsTable();
+      showToast('Campaña Publicitaria Lanzada', `"${name}" ya está optimizando pujas en ${platform}.`, 'success');
+    }
+
+    // =========================================================================
+    // 12. INICIALIZACIÓN AL CARGAR LA APLICACIÓN
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      registerDynamicPwaAssets();
+      lucide.createIcons();
+      updateNetworkUI();
+      renderBrandSelectorsAndCards();
+      updateAutonomyUI();
+      renderDashboardNetworks();
+      initPerformanceChart();
+      renderProfilesSection();
+      renderStudioAssetPreview();
+      liveAdaptStudioCopies();
+      const humInput = document.getElementById('humanizer-input-text');
+      if (humInput) analyzeTextForAI(humInput.value);
+      renderWeeklyCalendar();
+      renderInboxList();
+      renderViralTrends();
+      renderAdsTable();
+    });
+  </script>
+</body>
+</html>
